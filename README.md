@@ -19,11 +19,11 @@ FastLedger busca reducir la incertidumbre del comercio internacional al Ecuador.
 
 ```text
 FASTLEDGER/
-├── index.html
-├── README.md
-├── Proyecto FastLedger - Propuesta Comercial y Técnica.pdf
-├── Whitepaper FastLedger V3 - Importación Inteligente.pdf
-└── Resumen Ejecutivo FastLedger.pdf
+â”œâ”€â”€ index.html
+â”œâ”€â”€ README.md
+â”œâ”€â”€ Proyecto FastLedger - Propuesta Comercial y TÃ©cnica.pdf
+â”œâ”€â”€ Whitepaper FastLedger V3 - ImportaciÃ³n Inteligente.pdf
+â””â”€â”€ Resumen Ejecutivo FastLedger.pdf
 ```
 
 ## Ejecutar localmente
@@ -95,4 +95,3 @@ http://localhost:8000
 ## Equipo
 
 Proyecto desarrollado para Hackathon 2026 en Quito, Ecuador, con enfoque en ODS 9: Industria, Innovacion e Infraestructura.
-
