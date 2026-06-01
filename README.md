@@ -1,39 +1,98 @@
- **FastLedger — Plataforma de Importación Inteligente**
+# FastLedger
 
-"IMPORTAMOS, CONECTAMOS, ENTREGAMOS A ECUADOR" > Proyecto desarrollado para el Hackathon 2026 | 📍 Quito, Ecuador | Enfoque: ODS 9 (Industria, Innovación e Infraestructura)
+Plataforma web para importaciones inteligentes hacia Ecuador. FastLedger combina calculadoras de costos, asistencia basada en IA y trazabilidad tipo blockchain para ayudar a personas, PyMEs y emprendedores a estimar, organizar y documentar procesos de importacion.
 
-🚀 **¿Qué es FastLedger?**
-FastLedger es un ecosistema digital que transforma radicalmente el comercio internacional hacia Ecuador. Combinamos Inteligencia Artificial y Blockchain para eliminar la burocracia, automatizar la logística aduanera y calcular costos de importación con precisión quirúrgica, ofreciendo una experiencia de compra internacional 100% digital y sin sorpresas.
+## Propuesta
 
-👥 **Nuestro Equipo**
-Integrante	Rol
-Erick Hidalgo	🥇 Líder de Proyecto
-Julian Chicaiza	📝 Secretario
-Baruc Lincango	🎨 Diseñador UX/UI
-Nicolas Ruiz	🔍 Investigador
-Francisco Sotomayor	📢 Presentador / Pitcher
+FastLedger busca reducir la incertidumbre del comercio internacional al Ecuador. La aplicacion permite estimar costos antes de comprar, orientar al usuario sobre impuestos y tramites, y centralizar informacion clave para el proceso de aduanizacion.
 
-🧠 **Características Clave**
-- Visión Artificial (IA): Clasificación automatizada de productos mediante escaneo de imágenes para determinar su partida arancelaria exacta.
-- Presupuesto en Tiempo Real: Cálculo inmediato del costo total de importación (incluyendo Aranceles, IVA, fletes y salvaguardias) antes de realizar la compra.
-- Aduanización Eficiente con Blockchain: Registro inmutable de la cadena logística respaldado por Smart Contracts para acelerar los procesos de control del SENAE.
-- Cobro Automatizado: Liquidación de impuestos en tiempo real para reducir costos de personal manual y demoras burocráticas.
+## Funcionalidades principales
 
-🛠️ **Arquitectura Tecnológica**
-El proyecto está construido utilizando el siguiente stack tecnológico:
+- Calculadora de importacion para paquetes, vehiculos y carga.
+- Estimacion de aranceles, IVA, flete, seguros y costos operativos.
+- Asistente conversacional para dudas frecuentes sobre importacion.
+- Flujo de contratacion con codigo de orden.
+- Concepto de trazabilidad blockchain para registrar hitos logisticos y aduaneros.
+- Material comercial y tecnico en PDF para presentar el proyecto.
 
-- Frontend: HTML5, CSS3, JavaScript (optimizado para navegación ágil y móvil).
-- Capa de IA: Modelos de Visión Computacional para reconocimiento de objetos y algoritmos predictivos de tasación de impuestos.
-- Capa de Confianza (Blockchain): Contratos Inteligentes en redes Layer 2 para un sellado criptográfico rápido y económico.
-- Integraciones: APIs de conectividad con proveedores de carga internacionales y simuladores de aduana.
+## Estructura del repositorio
 
-📈 **Impacto y ODS 9**
-Nuestra solución ataca directamente la meta 9.3 de los Objetivos de Desarrollo Sostenible. Al democratizar y transparentar el proceso aduanero, permitimos que las PyMEs y emprendedores locales importen insumos tecnológicos y materia prima de forma eficiente, eliminando las barreras logísticas que limitan su competitividad en el mercado global.
+```text
+FASTLEDGER/
+├── index.html
+├── README.md
+├── Proyecto FastLedger - Propuesta Comercial y Técnica.pdf
+├── Whitepaper FastLedger V3 - Importación Inteligente.pdf
+└── Resumen Ejecutivo FastLedger.pdf
+```
 
-⚙️ **Instalación y Uso Rápido (Local)**
-Si deseas clonar el repositorio y probar el entorno de desarrollo local, sigue estos pasos:
+## Ejecutar localmente
 
-Clona el repositorio:
-git clone [https://github.com/tu-usuario/fastledger.git](https://github.com/tu-usuario/fastledger.git) 
-⚙️ Instalación y Uso Rápido (Local)
-Si deseas clonar el repositorio y probar el entorno de desarrollo local, sigue estos pasos:
+Este proyecto funciona como una pagina HTML estatica.
+
+1. Clona el repositorio:
+
+```bash
+git clone https://github.com/Pablinvb/FASTLEDGER.git
+cd FASTLEDGER
+```
+
+2. Abre `index.html` directamente en el navegador.
+
+3. Opcionalmente, levanta un servidor local para evitar problemas con rutas o recursos externos:
+
+```bash
+python -m http.server 8000
+```
+
+Luego visita:
+
+```text
+http://localhost:8000
+```
+
+## Despliegue con GitHub Pages
+
+1. En GitHub, entra a `Settings`.
+2. Abre la seccion `Pages`.
+3. En `Build and deployment`, selecciona:
+   - Source: `Deploy from a branch`
+   - Branch: `main`
+   - Folder: `/root`
+4. Guarda los cambios.
+5. GitHub publicara el sitio usando `index.html`.
+
+## Hoja de ruta
+
+### Corto plazo
+
+- Renombrar archivos para que el sitio pueda publicarse correctamente en GitHub Pages.
+- Separar HTML, CSS y JavaScript en archivos independientes.
+- Revisar textos visibles, datos de contacto y consistencia visual.
+- Agregar validaciones para entradas de calculadora.
+
+### Mediano plazo
+
+- Crear una fuente de datos mantenible para aranceles, paises, categorias y tarifas.
+- Agregar pruebas basicas para calculos principales.
+- Documentar supuestos legales, tributarios y logisticos usados en las estimaciones.
+- Preparar un flujo de despliegue automatizado.
+
+### Largo plazo
+
+- Integrar servicios reales de cotizacion logistica.
+- Conectar un backend para usuarios, ordenes y trazabilidad.
+- Implementar registros verificables para hitos de importacion.
+- Crear panel administrativo para operaciones y seguimiento.
+
+## Recomendaciones de desarrollo
+
+- Mantener `index.html` como punto de entrada principal.
+- Evitar nombres con espacios innecesarios o sufijos como `(1)` en archivos criticos.
+- Documentar cualquier formula de calculo antes de usarla en produccion.
+- Validar informacion aduanera contra fuentes oficiales antes de presentarla como definitiva.
+
+## Equipo
+
+Proyecto desarrollado para Hackathon 2026 en Quito, Ecuador, con enfoque en ODS 9: Industria, Innovacion e Infraestructura.
+
