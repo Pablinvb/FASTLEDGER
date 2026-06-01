@@ -19,12 +19,25 @@ FastLedger busca reducir la incertidumbre del comercio internacional al Ecuador.
 
 ```text
 FASTLEDGER/
-â”œâ”€â”€ index.html
-â”œâ”€â”€ README.md
-â”œâ”€â”€ Proyecto FastLedger - Propuesta Comercial y TÃ©cnica.pdf
-â”œâ”€â”€ Whitepaper FastLedger V3 - ImportaciÃ³n Inteligente.pdf
-â””â”€â”€ Resumen Ejecutivo FastLedger.pdf
+|- index.html
+|- styles.css
+|- app.js
+|- src/
+|  |- calculator.js
+|- tests/
+|  |- calculator.test.js
+|- docs/
+|  |- formulas.md
+|- Proyecto FastLedger - Propuesta Comercial y Tecnica.pdf
+|- Whitepaper FastLedger V3 - Importacion Inteligente.pdf
+|- Resumen Ejecutivo FastLedger.pdf
 ```
+
+## Documentos
+
+- `Proyecto FastLedger - Propuesta Comercial y Tecnica.pdf`: propuesta comercial y tecnica del proyecto.
+- `Whitepaper FastLedger V3 - Importacion Inteligente.pdf`: documento conceptual y tecnico de la solucion.
+- `Resumen Ejecutivo FastLedger.pdf`: resumen breve para presentaciones y revision rapida.
 
 ## Ejecutar localmente
 
@@ -39,7 +52,7 @@ cd FASTLEDGER
 
 2. Abre `index.html` directamente en el navegador.
 
-3. Opcionalmente, levanta un servidor local para evitar problemas con rutas o recursos externos:
+3. Opcionalmente, levanta un servidor local:
 
 ```bash
 python -m http.server 8000
@@ -50,6 +63,18 @@ Luego visita:
 ```text
 http://localhost:8000
 ```
+
+## Ejecutar pruebas
+
+Las pruebas cubren escenarios base de la calculadora y la tarifa de paquetes pequenos.
+
+```bash
+node tests/calculator.test.js
+```
+
+## Formulas y supuestos
+
+Las formulas estan documentadas en `docs/formulas.md`. Los valores son referenciales para prototipo y deben validarse con fuentes oficiales antes de usarse en operaciones reales.
 
 ## Despliegue con GitHub Pages
 
@@ -66,16 +91,14 @@ http://localhost:8000
 
 ### Corto plazo
 
-- Renombrar archivos para que el sitio pueda publicarse correctamente en GitHub Pages.
-- Separar HTML, CSS y JavaScript en archivos independientes.
 - Revisar textos visibles, datos de contacto y consistencia visual.
-- Agregar validaciones para entradas de calculadora.
+- Agregar validaciones mas completas para entradas de calculadora.
+- Mantener sincronizados los supuestos de `src/calculator.js` y `docs/formulas.md`.
 
 ### Mediano plazo
 
 - Crear una fuente de datos mantenible para aranceles, paises, categorias y tarifas.
-- Agregar pruebas basicas para calculos principales.
-- Documentar supuestos legales, tributarios y logisticos usados en las estimaciones.
+- Ampliar pruebas para mas escenarios de calculo.
 - Preparar un flujo de despliegue automatizado.
 
 ### Largo plazo
@@ -88,7 +111,7 @@ http://localhost:8000
 ## Recomendaciones de desarrollo
 
 - Mantener `index.html` como punto de entrada principal.
-- Evitar nombres con espacios innecesarios o sufijos como `(1)` en archivos criticos.
+- Evitar nombres genericos o con sufijos como `(1)` en archivos criticos.
 - Documentar cualquier formula de calculo antes de usarla en produccion.
 - Validar informacion aduanera contra fuentes oficiales antes de presentarla como definitiva.
 
