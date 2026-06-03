@@ -329,52 +329,123 @@ function calcular(){
    LEDGER — Motor local (paquetes pequeños)
 ══════════════════════════════════ */
 const TARIFA_LEDGER=5;
+const ledgerState={producto:null,peso:null,pais:null,lastQuote:null};
+const COUNTRY_ALIASES={
+  'estados unidos':'Estados Unidos','eeuu':'Estados Unidos','usa':'Estados Unidos','us':'Estados Unidos','miami':'Estados Unidos','new york':'Estados Unidos',
+  'china':'China','cn':'China','espana':'Espana','españa':'Espana','spain':'Espana','alemania':'Alemania','germany':'Alemania','de':'Alemania',
+  'mexico':'Mexico','méxico':'Mexico','mx':'Mexico','brasil':'Brasil','brazil':'Brasil','corea':'Corea del Sur','corea del sur':'Corea del Sur',
+  'japon':'Japon','japón':'Japon','italia':'Italia','francia':'Francia','ecuador':'Ecuador'
+};
+const PRODUCT_KEYWORDS={
+  'zapatos':'zapatos','zapato':'zapatos','zapatillas':'zapatos','tenis':'zapatos','sneakers':'zapatos','calzado':'zapatos',
+  'ropa':'ropa','camiseta':'ropa','camisetas':'ropa','pantalon':'ropa','pantalones':'ropa','pantalón':'ropa','vestido':'ropa','chaqueta':'ropa',
+  'cosmeticos':'cosmeticos','cosmetico':'cosmeticos','cosméticos':'cosmeticos','cosmético':'cosmeticos','maquillaje':'cosmeticos','perfume':'cosmeticos','cremas':'cosmeticos',
+  'telefono':'electronicos','teléfono':'electronicos','celular':'electronicos','iphone':'electronicos','laptop':'electronicos','tablet':'electronicos','electronico':'electronicos','electrónico':'electronicos',
+  'reloj':'relojes','relojes':'relojes','juguete':'juguetes','juguetes':'juguetes','repuesto':'repuestos','repuestos':'repuestos'
+};
+const VEHICLE_WORDS=['carro','coche','auto','vehiculo','vehículo','moto','camion','camión','bus','maquinaria'];
+const USED_WORDS=['usado','usada','segunda mano','de segunda'];
+
+function normText(text){
+  return String(text||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+}
+function fmtMoney(n){return '$'+Number(n).toFixed(2)+' USD';}
+function detectarLibras(msg){
+  const m=String(msg).match(/(\d+(?:[.,]\d+)?)\s*(libras?|lbs?|lb)\b/i);
+  if(m)return parseFloat(m[1].replace(',','.'));
+  const kg=String(msg).match(/(\d+(?:[.,]\d+)?)\s*(kilos?|kg)\b/i);
+  if(kg)return parseFloat(kg[1].replace(',','.'))*2.20462;
+  return null;
+}
+function detectarPais(msg){
+  const n=normText(msg);
+  for(const key of Object.keys(COUNTRY_ALIASES)){
+    if(n.includes(normText(key)))return COUNTRY_ALIASES[key];
+  }
+  return null;
+}
+function detectarProducto(msg){
+  const n=normText(msg);
+  for(const key of Object.keys(PRODUCT_KEYWORDS)){
+    if(n.includes(normText(key)))return PRODUCT_KEYWORDS[key];
+  }
+  const direct=String(msg).match(/(?:quiero|quisiera|traer|importar|enviar|comprar)\s+(?:unos?|unas?|el|la|los|las)?\s*([a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,32}?)(?:\s+de\s+|\s+desde\s+|\s+que\s+|\s+con\s+|,|\.|$)/i);
+  if(direct)return direct[1].trim().toLowerCase();
+  return null;
+}
+function isVehicleRequest(msg){
+  const n=normText(msg);
+  return VEHICLE_WORDS.some(w=>n.includes(normText(w)));
+}
+function isUsedVehicleRequest(msg){
+  const n=normText(msg);
+  return isVehicleRequest(msg)&&USED_WORDS.some(w=>n.includes(normText(w)));
+}
+function resetLedgerState(){
+  ledgerState.producto=null;ledgerState.peso=null;ledgerState.pais=null;ledgerState.lastQuote=null;
+}
+function updateLedgerState(msg){
+  const producto=detectarProducto(msg), peso=detectarLibras(msg), pais=detectarPais(msg);
+  if(producto)ledgerState.producto=producto;
+  if(peso!==null)ledgerState.peso=peso;
+  if(pais)ledgerState.pais=pais;
+}
+function quoteLedger(){
+  const cost=ledgerState.peso*TARIFA_LEDGER;
+  ledgerState.lastQuote={...ledgerState,cost};
+  setEl('ctx-total',`$${cost.toFixed(2)}`);
+  return `Listo, ya tengo los datos:\n\nProducto: <strong>${ledgerState.producto}</strong>\nPeso: <strong>${ledgerState.peso.toFixed(2)} lb</strong>\nOrigen: <strong>${ledgerState.pais}</strong>\n\nTarifa FastLedger: <strong>$${TARIFA_LEDGER} USD/lb</strong>\nTotal estimado: <strong style="color:var(--sky);font-size:1.1em">${fmtMoney(cost)}</strong>\n\nEste valor es referencial para paquete pequeno. Para continuar, puedes enviar esta cotizacion por WhatsApp al <strong>0978775005</strong> o escribirnos a <strong>FastLedger010@gmail.com</strong>.\n\nQuieres que te indique los pasos para generar tu codigo de orden?`;
+}
+function missingQuestion(){
+  const miss=[];
+  if(!ledgerState.producto)miss.push('que producto quieres importar');
+  if(!ledgerState.peso)miss.push('cuanto pesa en libras');
+  if(!ledgerState.pais)miss.push('desde que pais lo envias');
+  if(miss.length===3)return 'Para cotizarte necesito 3 datos: <strong>producto</strong>, <strong>peso en libras</strong> y <strong>pais de origen</strong>.\n\nEjemplo: "quiero traer zapatos, pesan 3 lb, desde Estados Unidos".';
+  if(miss.length===2)return `Perfecto, me falta saber <strong>${miss[0]}</strong> y <strong>${miss[1]}</strong>.`;
+  return `Perfecto, me falta saber <strong>${miss[0]}</strong>.`;
+}
+function processSteps(){
+  return `Claro. Para continuar con FastLedger:\n\n1. Confirma tu cotizacion.\n2. Envia tus datos de contacto.\n3. Recibe tu codigo de orden FastLedger.\n4. Envia el codigo por WhatsApp al <strong>0978775005</strong>.\n\nTambien puedes escribir a <strong>FastLedger010@gmail.com</strong>.`;
+}
 const KB=[
-  {k:['contacto','teléfono','telefono','número','numero','llamar','whatsapp','correo','email','escribir','atención','atencion','soporte','comunicar'],
-   r:`¡Por supuesto! 😊 Nuestro equipo te espera:\n\n📞 <strong>WhatsApp:</strong> <strong style="color:var(--sky)">0978775005</strong>\n📧 <strong>Email:</strong> <a href="mailto:FastLedger010@gmail.com" style="color:var(--sky)">FastLedger010@gmail.com</a>\n🕐 <strong>Horario:</strong> Lunes–Viernes, 8:00–18:00 (Ecuador)\n\n¡WhatsApp es lo más rápido! 🚀 ¿Hay algo más en lo que te pueda ayudar?`},
-  {k:['código de orden','codigo de orden','order code','qué es el código','que es el codigo','cómo comprar','como comprar','proceso de compra','cómo funciona el pago','como funciona el pago'],
-   r:`¡Excelente pregunta! Así funciona el proceso de compra en FastLedger: 🛒\n\n<strong>Paso 1:</strong> Calcula tu importación (Presupuesto IA o aquí con Ledger)\n<strong>Paso 2:</strong> Inicia sesión y haz clic en "Proceder a contratación"\n<strong>Paso 3:</strong> Completa tus datos de contacto\n<strong>Paso 4:</strong> Selecciona tu método de pago\n<strong>Paso 5:</strong> Recibes tu <strong style="color:var(--sky)">Código de Orden</strong> (ej: FL-AB3X7K)\n<strong>Paso 6:</strong> Envía ese código a nuestro equipo:\n\n📞 <strong>WhatsApp: 0978775005</strong>\n📧 <strong>FastLedger010@gmail.com</strong>\n\n⚠️ <strong>Sin el código de orden tu importación no puede procesarse.</strong>\n\n¿Tienes alguna duda sobre el proceso?`},
-  {k:['hola','buenos días','buenas tardes','buenas noches','saludos','hey','buenas'],
-   r:`¡Hola! Qué gusto saludarte 👋 Soy <strong>Ledger</strong>, tu asesor de <strong>FastLedger</strong> 🚀\n\nSoy especialista en <strong>paquetes pequeños</strong>: ropa, zapatos, cosméticos, electrónicos y más.\n\n💰 Mi tarifa: <strong>$5 USD/libra</strong> — simple y transparente\n📞 Contacto: <strong>0978775005</strong>\n\n¿Qué quieres importar hoy? Dime el producto y el peso 😊`},
-  {k:['cuánto cuesta','cuanto cuesta','precio','tarifa','costo del envío','costo de envio','cuánto cobran','cuanto cobran'],
-   r:`¡Fácil! 💰 En FastLedger manejamos una tarifa transparente:\n\n📦 <strong>$5 USD por libra</strong> para paquetes estándar\n\n🧮 Ejemplos:\n• 1 lb → $5\n• 3 lbs → $15\n• 5 lbs → $25\n• 10 lbs → $50\n\nTarifa fija, sin sorpresas. ✅\n\n¿Cuánto pesa tu paquete?`},
-  {k:['qué es fastledger','que es fastledger','cómo funciona','como funciona','para qué sirve','para que sirve','qué ofrecen','que ofrecen'],
-   r:`¡Claro! 🎉 <strong>FastLedger</strong> es la plataforma #1 de importaciones al Ecuador.\n\n🛠️ <strong>Servicios:</strong>\n• 📦 Paquetes pequeños: $5/lb (Ledger te cotiza aquí)\n• 🚗 Vehículos y carga grande: Presupuesto IA completo\n• 🔗 Rastreo blockchain en aduana\n• 🛒 Proceso de compra con código de orden\n\n📞 Contacto: <strong>0978775005</strong> | FastLedger010@gmail.com\n\n¿En qué te ayudo?`},
-  {k:['zapato','zapatilla','tenis','calzado','sneaker','shoe'],
-   r:`¡Traer zapatos es facilísimo con FastLedger! 👟\n\nTarifa: <strong>$5 USD/libra</strong>\n\nUn par pesa normalmente entre 2 y 4 libras:\n• 2 lbs → <strong>$10</strong>\n• 3 lbs → <strong>$15</strong>\n• 4 lbs → <strong>$20</strong>\n\n📦 ¿Cuánto pesan los tuyos y desde qué país los envías?`},
-  {k:['ropa','camiseta','pantalón','pantalon','vestido','camisa','chaqueta','abrigo','textil'],
-   r:`¡La ropa es uno de los envíos más comunes! 👕\n\nTarifa: <strong>$5 USD/libra</strong>\n\nEjemplo: 5 libras de ropa = <strong>$25 USD</strong> de envío 🎉\n\n¿Cuánto pesa tu envío y desde qué país? 😊`},
-  {k:['cosmético','cosmetico','maquillaje','perfume','crema','shampoo','belleza','beauty'],
-   r:`¡Los cosméticos son muy populares en FastLedger! 💄\n\nTarifa: <strong>$5 USD/libra</strong>\n\nEjemplos:\n• Set de maquillaje 1 lb → <strong>$5</strong>\n• Cremas y perfumes 2 lbs → <strong>$10</strong>\n• Caja de productos 4 lbs → <strong>$20</strong>\n\n¿Cuánto pesa tu pedido y desde qué país? 💋`},
-  {k:['teléfono','telefono','celular','iphone','samsung','laptop','tablet','electrónico','electronico'],
-   r:`¡Los electrónicos son súper populares! 📱💻\n\nTarifa: <strong>$5 USD/libra</strong>\n\nEjemplos:\n• Teléfono 0.5 lb → <strong>$2.50</strong>\n• Laptop 5 lbs → <strong>$25</strong>\n• Tablet 1 lb → <strong>$5</strong>\n\n💡 Los electrónicos tienen arancel 0% en Ecuador. ¡Ventaja! ✅\n\n¿Cuánto pesa y desde qué país lo traes?`},
-  {k:['carro','coche','auto','vehículo','vehiculo','moto','camion','camión'],
-   r:`Para vehículos, motos y carga pesada tenemos nuestra <strong>Calculadora IA</strong> especializada con aranceles completos. 🚗\n\nYo me enfoco en paquetes pequeños (ropa, cosméticos, electrónicos, etc.) a <strong>$5/lb</strong>.\n\n👉 Ve a la pestaña <strong>"Presupuesto IA"</strong> para cotizar tu vehículo con todos los impuestos, flete por contenedor y trámites SENAE.\n\n¿Puedo ayudarte con algo más? 😊`},
-  {k:['carro usado','auto usado','vehículo usado','vehiculo usado','segunda mano'],
-   r:`⚠️ Importante que sepas:\n\n🚫 <strong>Ecuador prohíbe totalmente la importación de vehículos usados.</strong>\n\nLey: <strong>Art. 73 COPCI</strong> + <strong>Resolución COMEX N° 116</strong>. Sin excepciones.\n\n✅ Solo se permiten vehículos <strong>0 km nuevos de fábrica</strong>.\n\n¿Puedo ayudarte con algo más? 😊`},
-  {k:['cuánto tiempo','cuanto tiempo','demora','días','tarda','llega','tiempo'],
-   r:`⏱️ Tiempos estimados:\n\n✈️ <strong>Aéreo:</strong>\n• EE.UU. → Ecuador: 5–10 días hábiles\n• Europa → Ecuador: 7–14 días\n• Asia → Ecuador: 10–18 días\n\n🚢 <strong>Marítimo:</strong>\n• EE.UU.: 15–25 días\n• Europa: 20–35 días\n\n🏛️ Aduana: 1–10 días según canal (verde es inmediato)\n\n¿Desde qué país viene tu envío?`},
-  {k:['gracias','muchas gracias','perfecto','excelente','genial','ok gracias','listo','chao','adiós','adios'],
-   r:`¡Con mucho gusto! 😊 Es un placer ayudarte.\n\n📞 <strong>WhatsApp: 0978775005</strong>\n📧 <strong>FastLedger010@gmail.com</strong>\n\n¡Que tengas un excelente día y mucho éxito con tu importación! 🚀✨\n\n¿Hay algo más en lo que te pueda ayudar?`},
+  {k:['contacto','telefono','numero','llamar','whatsapp','correo','email','escribir','atencion','soporte','comunicar'],r:`Por supuesto. Nuestro equipo te atiende por:\n\nWhatsApp: <strong>0978775005</strong>\nEmail: <strong>FastLedger010@gmail.com</strong>\nHorario: <strong>Lunes a viernes, 8:00 a 18:00 Ecuador</strong>\n\nSi quieres, tambien puedo cotizarte aqui. Dime producto, peso y pais de origen.`},
+  {k:['codigo de orden','order code','como comprar','proceso de compra','pago','proceder','continuar','contratar'],r:processSteps},
+  {k:['hola','buenos dias','buenas tardes','buenas noches','saludos','hey','buenas'],r:`Hola. Soy <strong>Ledger</strong>, tu asesor de FastLedger.\n\nPuedo cotizar paquetes pequenos con tarifa de <strong>$5 USD por libra</strong>.\n\nDime que producto quieres importar, cuanto pesa y desde que pais viene.`},
+  {k:['precio','tarifa','costo','cuanto cuesta','cuanto cobran'],r:`La tarifa para paquetes pequenos es <strong>$5 USD por libra</strong>.\n\nPara darte un total exacto necesito producto, peso y pais de origen. Ejemplo: "ropa, 5 lb, desde China".`},
+  {k:['tiempo','demora','dias','tarda','llega'],r:`Tiempos estimados:\n\nAereo: 5 a 18 dias habiles segun origen.\nMaritimo: 15 a 35 dias segun origen.\nAduana: 1 a 10 dias segun canal.\n\nSi me dices pais de origen, producto y peso, te cotizo el paquete.`},
+  {k:['gracias','perfecto','excelente','genial','ok gracias','listo','chao','adios'],r:`Con gusto. Si quieres hacer otra cotizacion, dime producto, peso y pais de origen.`}
 ];
 
-function detectarLibras(msg){
-  const m=msg.match(/(\d+(?:[.,]\d+)?)\s*(libras?|lbs?)\b/i);
-  return m?parseFloat(m[1].replace(',','.')):null;
-}
-
 function ledgerResponde(msg){
-  const m=msg.toLowerCase().trim();
-  const lbs=detectarLibras(msg);
-  if(lbs!==null){
-    const cost=(lbs*TARIFA_LEDGER).toFixed(2);
-    const prodMatch=msg.match(/(?:de|traer|importar|enviar|son)\s+(?:unos?|unas?)?\s*([a-záéíóúñ ]{3,25}?)(?:\s+que|\s+de|,|\.|$)/i);
-    const prod=prodMatch?` de <strong>${prodMatch[1].trim()}</strong>`:'';
-    setEl('ctx-total',`$${cost}`);
-    return `¡Al instante! 🧮\n\n<strong>${lbs} libra${lbs!==1?'s':''}${prod}</strong> × $${TARIFA_LEDGER}/lb = <strong style="color:var(--sky);font-size:1.1em">$${cost} USD</strong> 🎉\n\n✅ Tarifa fija y transparente. Sin sorpresas.\n\nPara proceder, comunícate con nosotros:\n📞 <strong>WhatsApp: 0978775005</strong>\n📧 <strong>FastLedger010@gmail.com</strong>\n\n¿Desde qué país lo envías? 🌎`;
+  const m=normText(msg);
+  if(!m)return missingQuestion();
+  if(m.includes('nueva cotizacion')||m.includes('otra cotizacion')||m==='reiniciar'||m==='nuevo'){
+    resetLedgerState();
+    return 'Listo, empecemos una nueva cotizacion. Dime producto, peso en libras y pais de origen.';
   }
-  for(const e of KB){if(e.k.some(kw=>m.includes(kw.toLowerCase())))return e.r;}
-  return `¡Gracias por escribir! 😊 Soy <strong>Ledger</strong> y me especializo en paquetes pequeños a <strong>$5 USD/lb</strong>.\n\nPara más ayuda:\n📞 <strong>0978775005</strong>\n📧 <strong>FastLedger010@gmail.com</strong>\n\n¿Me dices qué producto quieres importar y cuánto pesa? 📦`;
+  if(isUsedVehicleRequest(msg)){
+    return 'Importante: Ecuador no permite importar vehiculos usados. Solo se permiten vehiculos nuevos 0 km de fabrica. Para vehiculos nuevos usa la pestana <strong>Presupuesto IA</strong>.';
+  }
+  if(isVehicleRequest(msg)){
+    return 'Para vehiculos, motos, camiones o maquinaria grande usa la pestana <strong>Presupuesto IA</strong>, porque requiere aranceles, flete por contenedor y tramites SENAE. Yo aqui cotizo paquetes pequenos a $5 USD/lb.';
+  }
+
+  updateLedgerState(msg);
+
+  if((m.includes('si')||m.includes('sí')||m.includes('quiero')||m.includes('continuar')||m.includes('proceder'))&&ledgerState.lastQuote){
+    return processSteps();
+  }
+  if(ledgerState.producto&&ledgerState.peso&&ledgerState.pais){
+    return quoteLedger();
+  }
+
+  for(const e of KB){
+    if(e.k.some(kw=>m.includes(normText(kw)))){
+      return typeof e.r==='function'?e.r():e.r;
+    }
+  }
+  return missingQuestion();
 }
 
 function sendChat(){
@@ -384,7 +455,7 @@ function sendChat(){
   inp.value='';
   appendMsg('u',msg);
   const typing=appendTyping();
-  setTimeout(()=>{typing.remove();appendMsg('a',ledgerResponde(msg));},500+Math.random()*700);
+  setTimeout(()=>{typing.remove();appendMsg('a',ledgerResponde(msg));},450+Math.random()*500);
 }
 function quickQ(text){goPg('chat');setTimeout(()=>{document.getElementById('chat-in').value=text;sendChat();},120);}
 function appendMsg(role,text){
