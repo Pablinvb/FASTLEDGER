@@ -479,6 +479,23 @@ function ledgerResponde(msg){
   return missingQuestion();
 }
 
+async function ledgerRespondeConIA(msg){
+  const localResponse=ledgerResponde(msg);
+  if(!window.FastLedgerAI || !window.FastLedgerAI.configured()){
+    return localResponse;
+  }
+  return window.FastLedgerAI.generateLedgerResponse({
+    message: msg,
+    localResponse,
+    state: {
+      producto: ledgerState.producto,
+      peso: ledgerState.peso,
+      pais: ledgerState.pais,
+      lastQuote: ledgerState.lastQuote
+    }
+  });
+}
+
 function sendChat(){
   const inp=document.getElementById('chat-in');
   const msg=inp.value.trim();
@@ -487,9 +504,9 @@ function sendChat(){
   appendMsg('u',msg);
   persistConsultation('user', msg, null);
   const typing=appendTyping();
-  setTimeout(()=>{
+  setTimeout(async ()=>{
     typing.remove();
-    const response=ledgerResponde(msg);
+    const response=await ledgerRespondeConIA(msg);
     appendMsg('a',response);
     persistConsultation('assistant', response, ledgerState.lastQuote||null);
   },450+Math.random()*500);
