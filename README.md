@@ -24,10 +24,12 @@ FASTLEDGER/
 |- app.js
 |- src/
 |  |- calculator.js
+|  |- database.js
 |- tests/
 |  |- calculator.test.js
 |- docs/
 |  |- formulas.md
+|  |- database.md
 |- Proyecto FastLedger - Propuesta Comercial y Tecnica.pdf
 |- Whitepaper FastLedger V3 - Importacion Inteligente.pdf
 |- Resumen Ejecutivo FastLedger.pdf
@@ -75,6 +77,14 @@ node tests/calculator.test.js
 ## Formulas y supuestos
 
 Las formulas estan documentadas en `docs/formulas.md`. Los valores son referenciales para prototipo y deben validarse con fuentes oficiales antes de usarse en operaciones reales.
+
+## Usuarios y consultas
+
+La app registra usuarios y conversaciones mediante `src/database.js`.
+
+- Sin configuracion externa, guarda datos localmente en el navegador para pruebas.
+- Para base de datos real, configura Supabase siguiendo `docs/database.md`.
+- No se deben guardar contrasenas directamente en tablas; para produccion usa un proveedor de autenticacion.
 
 ## Despliegue con GitHub Pages
 
