@@ -352,7 +352,7 @@ function calcular(){
    LEDGER — Motor local (paquetes pequeños)
 ══════════════════════════════════ */
 const TARIFA_LEDGER=5;
-const ledgerState={producto:null,peso:null,pais:null,lastQuote:null};
+const ledgerState={producto:null,peso:null,pais:null,fob:null,flete:null,seguro:null,partida:null,iva:null,adValorem:null,fodinfa:null,costosLogisticos:null,margen:null,lastQuote:null};
 const COUNTRY_ALIASES={
   'estados unidos':'Estados Unidos','eeuu':'Estados Unidos','usa':'Estados Unidos','us':'Estados Unidos','miami':'Estados Unidos','new york':'Estados Unidos',
   'china':'China','cn':'China','espana':'Espana','españa':'Espana','spain':'Espana','alemania':'Alemania','germany':'Alemania','de':'Alemania',
@@ -379,6 +379,28 @@ function detectarLibras(msg){
   const kg=String(msg).match(/(\d+(?:[.,]\d+)?)\s*(kilos?|kg)\b/i);
   if(kg)return parseFloat(kg[1].replace(',','.'))*2.20462;
   return null;
+}
+function detectarMonto(msg,labels){
+  const text=String(msg||'');
+  for(const label of labels){
+    const re=new RegExp(`${label}\\s*(?:de|es|:)?\\s*\\$?\\s*(\\d+(?:[.,]\\d+)?)`,'i');
+    const m=text.match(re);
+    if(m)return parseFloat(m[1].replace(',','.'));
+  }
+  return null;
+}
+function detectarPorcentaje(msg,labels){
+  const text=String(msg||'');
+  for(const label of labels){
+    const re=new RegExp(`${label}\\s*(?:de|es|:)?\\s*(\\d+(?:[.,]\\d+)?)\\s*%`,'i');
+    const m=text.match(re);
+    if(m)return parseFloat(m[1].replace(',','.'))/100;
+  }
+  return null;
+}
+function detectarPartida(msg){
+  const m=String(msg||'').match(/(?:partida|subpartida|hs|arancelaria)\s*(?:es|:)?\s*([0-9]{4,10}(?:\.[0-9]{2,4})?)/i);
+  return m?m[1]:null;
 }
 function detectarPais(msg){
   const n=normText(msg);
@@ -413,13 +435,31 @@ function isUsedVehicleRequest(msg){
   return isVehicleRequest(msg)&&USED_WORDS.some(w=>n.includes(normText(w)));
 }
 function resetLedgerState(){
-  ledgerState.producto=null;ledgerState.peso=null;ledgerState.pais=null;ledgerState.lastQuote=null;
+  Object.assign(ledgerState,{producto:null,peso:null,pais:null,fob:null,flete:null,seguro:null,partida:null,iva:null,adValorem:null,fodinfa:null,costosLogisticos:null,margen:null,lastQuote:null});
 }
 function updateLedgerState(msg){
   const producto=detectarProducto(msg), peso=detectarLibras(msg), pais=detectarPais(msg);
   if(producto)ledgerState.producto=producto;
   if(peso!==null)ledgerState.peso=peso;
   if(pais)ledgerState.pais=pais;
+  const fob=detectarMonto(msg,['fob','valor fob','valor del producto','producto cuesta','cuesta']);
+  const flete=detectarMonto(msg,['flete','envio','envío','transporte internacional']);
+  const seguro=detectarMonto(msg,['seguro']);
+  const costos=detectarMonto(msg,['costos logisticos','costos logísticos','logistica','logística','agente','almacenaje']);
+  const margen=detectarPorcentaje(msg,['margen','ganancia','margen de ganancia']);
+  const iva=detectarPorcentaje(msg,['iva']);
+  const adv=detectarPorcentaje(msg,['ad valorem','ad-valorem','arancel']);
+  const fod=detectarPorcentaje(msg,['fodinfa']);
+  const partida=detectarPartida(msg);
+  if(fob!==null)ledgerState.fob=fob;
+  if(flete!==null)ledgerState.flete=flete;
+  if(seguro!==null)ledgerState.seguro=seguro;
+  if(costos!==null)ledgerState.costosLogisticos=costos;
+  if(margen!==null)ledgerState.margen=margen;
+  if(iva!==null)ledgerState.iva=iva;
+  if(adv!==null)ledgerState.adValorem=adv;
+  if(fod!==null)ledgerState.fodinfa=fod;
+  if(partida)ledgerState.partida=partida;
 }
 function quoteLedger(){
   const cost=ledgerState.peso*TARIFA_LEDGER;
@@ -491,6 +531,15 @@ async function ledgerRespondeConIA(msg){
       producto: ledgerState.producto,
       peso: ledgerState.peso,
       pais: ledgerState.pais,
+      fob: ledgerState.fob,
+      flete: ledgerState.flete,
+      seguro: ledgerState.seguro,
+      partida: ledgerState.partida,
+      iva: ledgerState.iva,
+      adValorem: ledgerState.adValorem,
+      fodinfa: ledgerState.fodinfa,
+      costosLogisticos: ledgerState.costosLogisticos,
+      margen: ledgerState.margen,
       lastQuote: ledgerState.lastQuote
     }
   });
