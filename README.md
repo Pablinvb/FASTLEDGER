@@ -25,11 +25,13 @@ FASTLEDGER/
 |- src/
 |  |- calculator.js
 |  |- database.js
+|  |- gemini.js
 |- tests/
 |  |- calculator.test.js
 |- docs/
 |  |- formulas.md
 |  |- database.md
+|  |- gemini.md
 |- Proyecto FastLedger - Propuesta Comercial y Tecnica.pdf
 |- Whitepaper FastLedger V3 - Importacion Inteligente.pdf
 |- Resumen Ejecutivo FastLedger.pdf
@@ -85,6 +87,15 @@ La app registra usuarios y conversaciones mediante `src/database.js`.
 - Sin configuracion externa, guarda datos localmente en el navegador para pruebas.
 - Para base de datos real, configura Supabase siguiendo `docs/database.md`.
 - No se deben guardar contrasenas directamente en tablas; para produccion usa un proveedor de autenticacion.
+
+## Gemini para Ledger
+
+Ledger puede usar Gemini como motor de razonamiento conversacional mediante `src/gemini.js`.
+
+- Sin configuracion, usa el motor local seguro.
+- Con un proxy backend, Gemini mejora la redaccion y continuidad.
+- No publiques API keys reales en GitHub Pages.
+- La guia esta en `docs/gemini.md`.
 
 ## Despliegue con GitHub Pages
 
