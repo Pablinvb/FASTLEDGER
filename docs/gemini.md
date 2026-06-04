@@ -1,51 +1,81 @@
-# Gemini para el asesor Ledger
+# Gemini + Vercel para Ledger
 
-FastLedger puede usar Gemini para mejorar el razonamiento conversacional de Ledger.
+FastLedger usa la arquitectura:
 
-## Recomendado para produccion
+```text
+GitHub Pages
+  -> Chat del asesor Ledger
+  -> Vercel Function: /api/asesor
+  -> Gemini API gemini-2.5-flash
+  -> Respuesta del asesor
+```
 
-No publiques una API key real en GitHub Pages. Usa un backend o proxy propio:
+## 1. Desplegar backend en Vercel
+
+Importa este repositorio en Vercel. La funcion esta en:
+
+```text
+api/asesor.js
+```
+
+En Vercel configura la variable de entorno:
+
+```text
+GEMINI_API_KEY=tu_api_key_de_gemini
+```
+
+La funcion usa:
+
+```text
+gemini-2.5-flash
+```
+
+## 2. Conectar GitHub Pages con Vercel
+
+Crea un archivo `config.js` en la raiz del sitio con:
 
 ```js
 window.FASTLEDGER_GEMINI = {
-  endpoint: "https://tu-backend.com/api/ledger"
+  endpoint: "https://tu-proyecto.vercel.app/api/asesor"
 };
 ```
 
-El backend debe recibir:
+Luego carga `config.js` antes de `src/gemini.js` en `index.html`:
+
+```html
+<script src="config.js"></script>
+<script src="src/gemini.js"></script>
+```
+
+## 3. Datos que Ledger debe razonar
+
+El asesor debe pedir o usar:
+
+- Tipo de producto
+- Pais de origen
+- Valor FOB
+- Flete
+- Seguro
+- Partida arancelaria
+- IVA
+- Ad-valorem
+- FODINFA
+- Costos logisticos
+- Margen de ganancia
+- Precio final estimado
+
+## 4. Seguridad
+
+No publiques `GEMINI_API_KEY` en GitHub Pages. La clave debe vivir solo en Vercel como variable de entorno.
+
+## 5. Respuesta esperada del backend
+
+El backend puede devolver:
 
 ```json
 {
-  "message": "mensaje del cliente",
-  "localResponse": "respuesta local segura",
-  "state": {
-    "producto": "ropa",
-    "peso": 5,
-    "pais": "Francia",
-    "lastQuote": {}
-  }
+  "text": "respuesta HTML simple para el cliente"
 }
 ```
 
-Y devolver:
-
-```json
-{
-  "text": "respuesta final para mostrar al cliente"
-}
-```
-
-## Solo para pruebas locales
-
-Puedes usar una key directa, sabiendo que en una web publica quedara visible:
-
-```js
-window.FASTLEDGER_GEMINI = {
-  apiKey: "TU_GEMINI_API_KEY",
-  model: "gemini-3.5-flash"
-};
-```
-
-## Comportamiento
-
-Ledger siempre calcula primero una respuesta local segura. Gemini solo puede mejorar la redaccion y continuidad, pero no debe cambiar precios, peso, producto, pais ni reglas operativas.
+Tambien se acepta el JSON crudo de Gemini; `src/gemini.js` extrae el texto automaticamente.
