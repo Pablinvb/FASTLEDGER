@@ -6,6 +6,25 @@ let lastCalcTotal = 0;
 let lastCalcData  = {};
 let selectedPayMethod = 0;
 let generatedOrderCode = '';
+const DB = window.FastLedgerDB || null;
+
+async function persistUser(user){
+  if(!DB || !user || !user.email)return;
+  try{ await DB.upsertUser(user); }catch(err){ console.warn('No se pudo guardar usuario', err); }
+}
+async function persistConsultation(role,message,quote){
+  if(!DB)return;
+  const user=currentUser||{name:'Invitado',email:'invitado'};
+  try{
+    await DB.saveConsultation({
+      user_name:user.name||'Invitado',
+      user_email:user.email||'invitado',
+      role,
+      message,
+      quote:quote||null
+    });
+  }catch(err){ console.warn('No se pudo guardar consulta', err); }
+}
 
 function goPg(id){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
@@ -29,20 +48,22 @@ function switchAuthTab(t){
   document.getElementById('mf-login').classList.toggle('on',t==='login');
   document.getElementById('mf-reg').classList.toggle('on',t==='reg');
 }
-function doLogin(){
+async function doLogin(){
   const email = document.getElementById('login-email').value.trim();
   const pass  = document.getElementById('login-pass').value;
   if(!email||!pass){alert('Por favor completa todos los campos.');return;}
   currentUser = {name: email.split('@')[0], email};
+  await persistUser(currentUser);
   afterLogin();
 }
-function doRegister(){
+async function doRegister(){
   const name  = document.getElementById('reg-name').value.trim();
   const email = document.getElementById('reg-email').value.trim();
   const pass  = document.getElementById('reg-pass').value;
   if(!name||!email||!pass){alert('Por favor completa todos los campos.');return;}
   if(pass.length<6){alert('La contraseña debe tener al menos 6 caracteres.');return;}
   currentUser = {name, email};
+  await persistUser(currentUser);
   afterLogin();
 }
 function afterLogin(){
@@ -50,7 +71,9 @@ function afterLogin(){
   document.getElementById('nav-user-label').textContent = currentUser.name;
   document.getElementById('nav-user-btn').innerHTML = `<div class="av">${currentUser.name[0].toUpperCase()}</div><span>${currentUser.name}</span><i class="fas fa-chevron-down" style="font-size:.65rem"></i>`;
   setEl('ctx-user', currentUser.name);
-  appendMsg('a', `¡Bienvenido/a, <strong>${currentUser.name}</strong>! 🎉 Me alegra tenerte en FastLedger. Ya puedes cotizar y proceder con tus importaciones. ¿En qué te ayudo hoy?`);
+  const welcome=`¡Bienvenido/a, <strong>${currentUser.name}</strong>! 🎉 Me alegra tenerte en FastLedger. Ya puedes cotizar y proceder con tus importaciones. ¿En qué te ayudo hoy?`;
+  appendMsg('a', welcome);
+  persistConsultation('assistant', welcome, null);
 }
 function showUserMenu(){
   if(confirm(`¿Cerrar sesión? (${currentUser.email})`)){
@@ -359,8 +382,16 @@ function detectarLibras(msg){
 }
 function detectarPais(msg){
   const n=normText(msg);
-  for(const key of Object.keys(COUNTRY_ALIASES)){
-    if(n.includes(normText(key)))return COUNTRY_ALIASES[key];
+  const keys=Object.keys(COUNTRY_ALIASES).sort((a,b)=>normText(b).length-normText(a).length);
+  for(const key of keys){
+    const nk=normText(key);
+    if(nk.length<=2){
+      if(n===nk)return COUNTRY_ALIASES[key];
+      continue;
+    }
+    if(new RegExp(`(^|\\s)${nk.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(\\s|$)`).test(n)){
+      return COUNTRY_ALIASES[key];
+    }
   }
   return null;
 }
@@ -454,8 +485,14 @@ function sendChat(){
   if(!msg)return;
   inp.value='';
   appendMsg('u',msg);
+  persistConsultation('user', msg, null);
   const typing=appendTyping();
-  setTimeout(()=>{typing.remove();appendMsg('a',ledgerResponde(msg));},450+Math.random()*500);
+  setTimeout(()=>{
+    typing.remove();
+    const response=ledgerResponde(msg);
+    appendMsg('a',response);
+    persistConsultation('assistant', response, ledgerState.lastQuote||null);
+  },450+Math.random()*500);
 }
 function quickQ(text){goPg('chat');setTimeout(()=>{document.getElementById('chat-in').value=text;sendChat();},120);}
 function appendMsg(role,text){
