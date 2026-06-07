@@ -24,8 +24,10 @@ FASTLEDGER/
 |- app.js
 |- src/
 |  |- calculator.js
+|  |- auth.js
 |  |- database.js
 |  |- gemini.js
+|  |- config.example.js
 |- tests/
 |  |- calculator.test.js
 |- docs/
@@ -82,11 +84,12 @@ Las formulas estan documentadas en `docs/formulas.md`. Los valores son referenci
 
 ## Usuarios y consultas
 
-La app registra usuarios y conversaciones mediante `src/database.js`.
+La app registra usuarios y conversaciones mediante `src/auth.js` y `src/database.js`.
 
-- Sin configuracion externa, guarda datos localmente en el navegador para pruebas.
-- Para base de datos real, configura Supabase siguiendo `docs/database.md`.
-- No se deben guardar contrasenas directamente en tablas; para produccion usa un proveedor de autenticacion.
+- Sin configuracion externa, guarda consultas localmente en el navegador para pruebas.
+- El registro e inicio de sesion quedan bloqueados hasta configurar Supabase Auth; asi no se aceptan correos ficticios como cuentas verificadas.
+- Para base de datos real y verificacion por correo, configura Supabase siguiendo `docs/database.md`.
+- No se deben guardar contrasenas directamente en tablas; usa Supabase Auth u otro proveedor de autenticacion.
 
 ## Gemini para Ledger
 
