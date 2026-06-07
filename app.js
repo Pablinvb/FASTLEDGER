@@ -7,6 +7,7 @@ let lastCalcData  = {};
 let selectedPayMethod = 0;
 let generatedOrderCode = '';
 const DB = window.FastLedgerDB || null;
+const AUTH = window.FastLedgerAuth || null;
 
 async function persistUser(user){
   if(!DB || !user || !user.email)return;
@@ -83,6 +84,70 @@ function showUserMenu(){
     setEl('ctx-user','Invitado');
   }
 }
+async function doLogin(){
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  if(!email||!pass){alert('Por favor completa todos los campos.');return;}
+  try{
+    if(!AUTH || AUTH.mode!=='supabase'){
+      alert('El inicio de sesion seguro aun no esta configurado. Activa Supabase Auth para verificar correos reales.');
+      return;
+    }
+    currentUser = await AUTH.signIn(email, pass);
+    await persistUser(currentUser);
+    afterLogin();
+  }catch(err){
+    alert(err.message || 'No se pudo iniciar sesion. Verifica tus datos y confirma tu correo.');
+  }
+}
+async function doRegister(){
+  const name  = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass  = document.getElementById('reg-pass').value;
+  if(!name||!email||!pass){alert('Por favor completa todos los campos.');return;}
+  try{
+    if(!AUTH || AUTH.mode!=='supabase'){
+      alert('Para evitar correos ficticios, el registro requiere Supabase Auth con confirmacion por email.');
+      return;
+    }
+    const result = await AUTH.signUp(name, email, pass);
+    if(result.needsEmailConfirmation){
+      alert('Te enviamos un correo de verificacion. Abre el enlace antes de iniciar sesion.');
+      switchAuthTab('login');
+      document.getElementById('login-email').value = email;
+      document.getElementById('login-pass').value = '';
+      return;
+    }
+    currentUser = result.user;
+    await persistUser(currentUser);
+    afterLogin();
+  }catch(err){
+    alert(err.message || 'No se pudo crear la cuenta. Usa un correo real y una contrasena segura.');
+  }
+}
+function showUserMenu(){
+  if(confirm(`Â¿Cerrar sesiÃ³n? (${currentUser.email})`)){
+    if(AUTH) AUTH.signOut();
+    currentUser=null;
+    document.getElementById('nav-user-label').textContent='Iniciar sesiÃ³n';
+    document.getElementById('nav-user-btn').innerHTML=`<i class="fas fa-user-circle" style="font-size:.95rem"></i><span>Iniciar sesiÃ³n</span>`;
+    setEl('ctx-user','Invitado');
+  }
+}
+async function restoreAuthSession(){
+  if(!AUTH || AUTH.mode!=='supabase') return;
+  try{
+    const user = await AUTH.currentUser();
+    if(user && user.email_verified){
+      currentUser = user;
+      document.getElementById('nav-user-label').textContent = currentUser.name;
+      document.getElementById('nav-user-btn').innerHTML = `<div class="av">${currentUser.name[0].toUpperCase()}</div><span>${currentUser.name}</span><i class="fas fa-chevron-down" style="font-size:.65rem"></i>`;
+      setEl('ctx-user', currentUser.name);
+      await persistUser(currentUser);
+    }
+  }catch(err){ console.warn('No se pudo restaurar sesion', err); }
+}
+restoreAuthSession();
 document.getElementById('auth-modal').addEventListener('click',function(e){if(e.target===this)closeModal('auth-modal');});
 document.getElementById('checkout-modal').addEventListener('click',function(e){if(e.target===this)closeModal('checkout-modal');});
 
