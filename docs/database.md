@@ -11,7 +11,7 @@ Si no existe configuracion remota, FastLedger guarda consultas en `localStorage`
 
 ## Modo Supabase
 
-Para usar una base de datos real y verificacion de correo, copia `src/config.example.js` como `config.js` y llena:
+Para usar una base de datos real y verificacion de correo, llena `config.js` con:
 
 ```js
 window.FASTLEDGER_SUPABASE = {
@@ -20,7 +20,7 @@ window.FASTLEDGER_SUPABASE = {
 };
 ```
 
-Luego enlaza `config.js` antes de `src/auth.js` y `src/database.js` en `index.html`.
+`config.js` ya esta enlazado antes de `src/auth.js` y `src/database.js` en `index.html`:
 
 ```html
 <script src="config.js"></script>
