@@ -125,6 +125,25 @@ async function doRegister(){
     alert(err.message || 'No se pudo crear la cuenta. Usa un correo real y una contrasena segura.');
   }
 }
+async function resendVerificationEmail(){
+  const email = (document.getElementById('login-email')?.value || document.getElementById('reg-email')?.value || '').trim();
+  if(!email){alert('Escribe tu correo en el formulario para reenviar la verificacion.');return;}
+  try{
+    if(!AUTH || AUTH.mode!=='supabase'){
+      alert('El reenvio requiere Supabase Auth configurado.');
+      return;
+    }
+    await AUTH.resendConfirmation(email);
+    alert('Listo. Si la cuenta existe y aun no esta confirmada, Supabase enviara un nuevo correo de verificacion. Revisa tambien spam o promociones.');
+  }catch(err){
+    const message = String(err.message || '');
+    if(message.toLowerCase().includes('rate') || message.toLowerCase().includes('limit')){
+      alert('Supabase alcanzo el limite de correos. Espera una hora o configura SMTP propio en Supabase para envios confiables.');
+      return;
+    }
+    alert(message || 'No se pudo reenviar el correo de verificacion.');
+  }
+}
 function showUserMenu(){
   if(confirm(`Â¿Cerrar sesiÃ³n? (${currentUser.email})`)){
     if(AUTH) AUTH.signOut();
