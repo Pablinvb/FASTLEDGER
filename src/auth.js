@@ -60,6 +60,10 @@
     return `${cfg.url.replace(/\/$/,"")}/auth/v1/${path}`;
   }
 
+  function appRedirectUrl(){
+    return `${location.origin}${location.pathname}`;
+  }
+
   async function authFetch(path, body, accessToken){
     const headers = {
       "apikey": cfg.anonKey,
@@ -82,6 +86,23 @@
     if(session && session.access_token){
       localStorage.setItem(SESSION_KEY, JSON.stringify(session));
     }
+  }
+
+  function saveSessionFromUrl(){
+    const hash = new URLSearchParams(location.hash.replace(/^#/,""));
+    const accessToken = hash.get("access_token");
+    const refreshToken = hash.get("refresh_token");
+    if(accessToken){
+      saveSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+        expires_at: Math.floor(Date.now() / 1000) + Number(hash.get("expires_in") || 3600),
+        token_type: hash.get("token_type") || "bearer"
+      });
+      history.replaceState(null, "", `${location.origin}${location.pathname}${location.search}`);
+      return true;
+    }
+    return false;
   }
 
   function readSession(){
@@ -116,12 +137,13 @@
     const cleanName = String(name || "").trim();
     if(cleanName.length < 3) throw new Error("Ingresa tu nombre completo.");
 
-    const data = await authFetch("signup", {
+    const redirectTo = encodeURIComponent(appRedirectUrl());
+    const data = await authFetch(`signup?redirect_to=${redirectTo}`, {
       email: emailCheck.email,
       password,
       data: {name: cleanName},
       options: {
-        emailRedirectTo: `${location.origin}${location.pathname}`
+        email_redirect_to: appRedirectUrl()
       }
     });
     if(data.session) saveSession(data.session);
@@ -149,8 +171,24 @@
     return user;
   }
 
+  async function resendConfirmation(email){
+    if(!configured()){
+      throw new Error("El reenvio requiere Supabase Auth configurado.");
+    }
+    const emailCheck = validateEmail(email);
+    if(!emailCheck.ok) throw new Error(emailCheck.message);
+    return authFetch("resend", {
+      type: "signup",
+      email: emailCheck.email,
+      options: {
+        email_redirect_to: appRedirectUrl()
+      }
+    });
+  }
+
   async function currentUser(){
     if(!configured()) return null;
+    saveSessionFromUrl();
     const session = readSession();
     if(!session) return null;
     const res = await fetch(authUrl("user"), {
@@ -180,6 +218,7 @@
     validatePassword,
     signUp,
     signIn,
+    resendConfirmation,
     currentUser,
     signOut
   };
