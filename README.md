@@ -20,6 +20,7 @@ FastLedger busca reducir la incertidumbre del comercio internacional al Ecuador.
 ```text
 FASTLEDGER/
 |- index.html
+|- config.js
 |- styles.css
 |- app.js
 |- src/
