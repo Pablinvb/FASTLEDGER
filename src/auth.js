@@ -82,6 +82,19 @@
     return data;
   }
 
+  async function authGet(path, accessToken){
+    const headers = {
+      "apikey": cfg.anonKey,
+      "Authorization": `Bearer ${accessToken || cfg.anonKey}`
+    };
+    const res = await fetch(authUrl(path), {headers});
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok){
+      throw new Error(data.error_description || data.msg || data.message || `Error de autenticacion (${res.status})`);
+    }
+    return data;
+  }
+
   function saveSession(session){
     if(session && session.access_token){
       localStorage.setItem(SESSION_KEY, JSON.stringify(session));
@@ -89,6 +102,19 @@
   }
 
   function saveSessionFromUrl(){
+    const query = new URLSearchParams(location.search);
+    const queryAccessToken = query.get("access_token");
+    if(queryAccessToken){
+      saveSession({
+        access_token: queryAccessToken,
+        refresh_token: query.get("refresh_token"),
+        expires_at: Math.floor(Date.now() / 1000) + Number(query.get("expires_in") || 3600),
+        token_type: query.get("token_type") || "bearer"
+      });
+      history.replaceState(null, "", `${location.origin}${location.pathname}`);
+      return true;
+    }
+
     const hash = new URLSearchParams(location.hash.replace(/^#/,""));
     const accessToken = hash.get("access_token");
     const refreshToken = hash.get("refresh_token");
@@ -103,6 +129,21 @@
       return true;
     }
     return false;
+  }
+
+  async function verifyTokenHashFromUrl(){
+    const params = new URLSearchParams(location.search);
+    const tokenHash = params.get("token_hash");
+    const type = params.get("type") || "email";
+    if(!tokenHash) return false;
+
+    const data = await authFetch("verify", {
+      token_hash: tokenHash,
+      type
+    });
+    if(data.session) saveSession(data.session);
+    history.replaceState(null, "", `${location.origin}${location.pathname}`);
+    return true;
   }
 
   function readSession(){
@@ -163,11 +204,11 @@
       email: emailCheck.email,
       password
     });
-    saveSession(data);
     const user = userFromAuth(data.user);
     if(!user?.email_verified){
       throw new Error("Revisa tu correo y confirma la cuenta antes de iniciar sesion.");
     }
+    saveSession(data);
     return user;
   }
 
@@ -189,19 +230,15 @@
   async function currentUser(){
     if(!configured()) return null;
     saveSessionFromUrl();
+    await verifyTokenHashFromUrl();
     const session = readSession();
     if(!session) return null;
-    const res = await fetch(authUrl("user"), {
-      headers: {
-        "apikey": cfg.anonKey,
-        "Authorization": `Bearer ${session.access_token}`
-      }
-    });
-    if(!res.ok){
+    try{
+      return userFromAuth(await authGet("user", session.access_token));
+    }catch(_){
       localStorage.removeItem(SESSION_KEY);
       return null;
     }
-    return userFromAuth(await res.json());
   }
 
   async function signOut(){
