@@ -77,6 +77,9 @@
     });
     const data = await res.json().catch(() => ({}));
     if(!res.ok){
+      if(res.status >= 500 && /database error/i.test(data.msg || data.message || "")){
+        throw new Error("Supabase no pudo completar el registro por un error interno de base de datos. Revisa Auth Logs y triggers de auth.users.");
+      }
       throw new Error(data.error_description || data.msg || data.message || `Error de autenticacion (${res.status})`);
     }
     return data;
