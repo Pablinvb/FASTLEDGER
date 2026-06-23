@@ -37,6 +37,13 @@ FASTLEDGER/
 |  |- gemini.js
 |  |- config.example.js
 |  |- trade-os.js
+|  |- backend.js
+|- backend/
+|  |- app/
+|  |- supabase/
+|  |- tests/
+|  |- Dockerfile
+|  |- requirements.txt
 |- tests/
 |  |- calculator.test.js
 |- docs/
@@ -44,6 +51,7 @@ FASTLEDGER/
 |  |- database.md
 |  |- gemini.md
 |  |- trade-os.md
+|  |- backend-deployment.md
 |- Proyecto FastLedger - Propuesta Comercial y Tecnica.pdf
 |- Whitepaper FastLedger V3 - Importacion Inteligente.pdf
 |- Resumen Ejecutivo FastLedger.pdf
@@ -109,6 +117,20 @@ Ledger puede usar Gemini como motor de razonamiento conversacional mediante `src
 - Con un proxy backend, Gemini mejora la redaccion y continuidad.
 - No publiques API keys reales en GitHub Pages.
 - La guia esta en `docs/gemini.md`.
+
+## Backend profesional
+
+La carpeta `backend/` contiene una API FastAPI preparada para Render:
+
+- Supabase Auth y PostgreSQL con RLS.
+- Operaciones e historial por usuario.
+- FASTY con Gemini y análisis multimodal.
+- Registro de documentos y hashes SHA-256.
+- Risk Score.
+- Marketplace de proveedores.
+- Correos transaccionales mediante Resend.
+
+La configuración completa está en `docs/backend-deployment.md`.
 
 ## Despliegue con GitHub Pages
 

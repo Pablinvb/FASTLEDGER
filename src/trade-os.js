@@ -162,7 +162,35 @@
     ).join("");
   }
 
-  root.runFastyAnalysis = function(){
+  function populateBackendResult(item){
+    byId("fasty-result-title").textContent = item.title;
+    byId("fasty-summary").textContent = item.executive_summary;
+    byId("fasty-tariff").textContent = item.tariff_code;
+    byId("fasty-landed").textContent = `$${Math.round(item.estimated_total || 0).toLocaleString("en-US")}`;
+    byId("fasty-days").textContent = `${item.estimated_days_min}-${item.estimated_days_max} dias`;
+    byId("fasty-margin").textContent = `${Number(item.projected_margin_percent || 0).toFixed(1)}%`;
+    const gauge = byId("fasty-risk-gauge");
+    gauge.querySelector("strong").textContent = item.risk_score;
+    gauge.style.borderColor = item.risk_score < 40 ? "var(--green)" : item.risk_score < 70 ? "var(--amber)" : "var(--red)";
+    byId("fasty-permits").innerHTML = (item.permits || []).map((permit,index) =>
+      `<li><i class="fas ${index === 1 ? "fa-triangle-exclamation" : "fa-circle-check"}"></i>${permit}</li>`
+    ).join("");
+    byId("fasty-costs").innerHTML = (item.costs || []).map(cost =>
+      `<div><span>${cost.label}</span><b>$${Math.round(cost.amount || 0).toLocaleString("en-US")}</b></div>`
+    ).join("");
+  }
+
+  function selectedFastyFile(){
+    if(currentMode === "image") return byId("fasty-image")?.files?.[0] || null;
+    if(currentMode === "pdf") return byId("fasty-pdf")?.files?.[0] || null;
+    return null;
+  }
+
+  function delay(ms){
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  root.runFastyAnalysis = async function(){
     const prompt = byId("fasty-prompt").value.trim();
     if(!prompt){
       alert("Describe la operación o adjunta un archivo antes de generar el plan.");
@@ -171,22 +199,31 @@
     const steps = [...document.querySelectorAll(".agent-step")];
     steps.forEach(step => step.classList.remove("ready","active"));
     byId("fasty-results").classList.remove("on");
-    steps.forEach((step,index) => {
-      setTimeout(() => {
-        steps[index - 1]?.classList.remove("active");
-        steps[index - 1]?.classList.add("ready");
-        step.classList.add("active");
-        if(index === steps.length - 1){
-          setTimeout(() => {
-            step.classList.remove("active");
-            step.classList.add("ready");
-            populateResult(detectExample(prompt));
-            byId("fasty-results").classList.add("on");
-            byId("fasty-results").scrollIntoView({behavior:"smooth",block:"start"});
-          }, 450);
-        }
-      }, index * 360);
-    });
+    let backendResult = null;
+    let backendError = null;
+    const api = root.FastLedgerAPI;
+    const backendPromise = api?.configured
+      ? api.analyze(prompt, selectedFastyFile()).catch(error => { backendError = error; return null; })
+      : Promise.resolve(null);
+
+    for(let index=0; index<steps.length; index++){
+      steps[index - 1]?.classList.remove("active");
+      steps[index - 1]?.classList.add("ready");
+      steps[index].classList.add("active");
+      await delay(320);
+    }
+    backendResult = await backendPromise;
+    steps[steps.length - 1].classList.remove("active");
+    steps[steps.length - 1].classList.add("ready");
+
+    if(backendResult){
+      populateBackendResult(backendResult);
+    }else{
+      populateResult(detectExample(prompt));
+      if(backendError) alert(`${backendError.message}\n\nSe mostrara el modo demostrativo.`);
+    }
+    byId("fasty-results").classList.add("on");
+    byId("fasty-results").scrollIntoView({behavior:"smooth",block:"start"});
   };
 
   root.changeTwinOperation = function(key){
