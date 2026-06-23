@@ -53,14 +53,16 @@ FASTLEDGER/
 |  |- trade-os.md
 |  |- backend-deployment.md
 |- Proyecto FastLedger - Propuesta Comercial y Tecnica.pdf
-|- Whitepaper FastLedger V3 - Importacion Inteligente.pdf
+|- Whitepaper FastLedger V4 - Trade Operating System.pdf
+|- Whitepaper FastLedger V4 - Trade Operating System.docx
 |- Resumen Ejecutivo FastLedger.pdf
 ```
 
 ## Documentos
 
 - `Proyecto FastLedger - Propuesta Comercial y Tecnica.pdf`: propuesta comercial y tecnica del proyecto.
-- `Whitepaper FastLedger V3 - Importacion Inteligente.pdf`: documento conceptual y tecnico de la solucion.
+- `Whitepaper FastLedger V4 - Trade Operating System.pdf`: whitepaper actualizado del Trade Operating System, FASTY Trade AI, backend profesional, digital twin, trazabilidad documental, marketplace, risk score y roadmap.
+- `Whitepaper FastLedger V4 - Trade Operating System.docx`: fuente editable del whitepaper V4.
 - `Resumen Ejecutivo FastLedger.pdf`: resumen breve para presentaciones y revision rapida.
 
 ## Ejecutar localmente
@@ -147,22 +149,21 @@ La configuración completa está en `docs/backend-deployment.md`.
 
 ### Corto plazo
 
-- Revisar textos visibles, datos de contacto y consistencia visual.
-- Agregar validaciones mas completas para entradas de calculadora.
-- Mantener sincronizados los supuestos de `src/calculator.js` y `docs/formulas.md`.
+- Activar el backend en Render con Supabase, Gemini y Resend.
+- Validar usuarios reales con Supabase Auth y confirmacion por correo.
+- Persistir operaciones, consultas, documentos y proveedores por usuario.
 
 ### Mediano plazo
 
-- Crear una fuente de datos mantenible para aranceles, paises, categorias y tarifas.
-- Ampliar pruebas para mas escenarios de calculo.
-- Preparar un flujo de despliegue automatizado.
+- Conectar fuentes arancelarias, OCR de facturas y analisis multimodal.
+- Lanzar el primer flujo completo de FASTY Trade AI para importacion y exportacion.
+- Medir Risk Score, costos, tiempos y trazabilidad documental en operaciones piloto.
 
 ### Largo plazo
 
-- Integrar servicios reales de cotizacion logistica.
-- Conectar un backend para usuarios, ordenes y trazabilidad.
-- Implementar registros verificables para hitos de importacion.
-- Crear panel administrativo para operaciones y seguimiento.
+- Integrar navieras, aseguradoras, bancos, courier y verificadores externos.
+- Desarrollar marketplace B2B de proveedores verificados.
+- Implementar digital twin operativo y trazabilidad blockchain empresarial.
 
 ## Recomendaciones de desarrollo
 
