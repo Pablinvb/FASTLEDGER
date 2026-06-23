@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FastLedger — Importaciones al Ecuador</title>
+<title>FastLedger — Trade Operating System</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="styles.css">
@@ -17,18 +17,20 @@
     <div class="logo-name">Fast<em>Ledger</em></div>
   </div>
   <div class="nav-tabs">
-    <button class="ntab on"  id="nt-home"   onclick="goPg('home')">Inicio</button>
-    <button class="ntab"     id="nt-calc"   onclick="goPg('calc')">Presupuesto IA</button>
-    <button class="ntab"     id="nt-bc"     onclick="goPg('bc')">Blockchain</button>
-    <button class="ntab"     id="nt-tariff" onclick="goPg('tariff')">Aranceles</button>
-    <button class="ntab"     id="nt-chat"   onclick="goPg('chat')">Asesor Ledger</button>
+    <button class="ntab on" id="nt-home" onclick="goPg('home')">Control</button>
+    <button class="ntab" id="nt-fasty" onclick="goPg('fasty')">FASTY AI</button>
+    <button class="ntab" id="nt-twin" onclick="goPg('twin')">Operaciones</button>
+    <button class="ntab" id="nt-market" onclick="goPg('market')">Marketplace</button>
+    <button class="ntab" id="nt-calc" onclick="goPg('calc')">Costos</button>
+    <button class="ntab" id="nt-bc" onclick="goPg('bc')">Blockchain</button>
+    <button class="ntab nav-more" id="nt-chat" onclick="goPg('chat')">Asesor</button>
   </div>
   <div class="nav-right">
     <div class="nav-user" id="nav-user-btn" onclick="openAuth()">
       <i class="fas fa-user-circle" style="font-size:.95rem"></i>
       <span id="nav-user-label">Iniciar sesión</span>
     </div>
-    <button class="ncta" onclick="goPg('calc')"><i class="fas fa-calculator" style="margin-right:5px"></i>Calcular</button>
+    <button class="ncta" onclick="goPg('fasty')"><i class="fas fa-wand-magic-sparkles" style="margin-right:5px"></i>Nueva operación</button>
   </div>
 </nav>
 
@@ -175,65 +177,336 @@
 <div id="pg-home" class="pg on">
   <div class="hero">
     <div>
-      <div class="eyebrow"><span class="eyebrow-dot"></span>Plataforma #1 Importaciones → Ecuador</div>
-      <h1 class="hero-h">Importa al <span class="hl">Ecuador</span><br>con <span class="hl2">IA</span> + Blockchain</h1>
-      <p class="hero-p">Calcula con precisión cuánto cuesta traer cualquier cosa al Ecuador. Vehículos, motos y carga pesada con presupuesto completo. Paquetes pequeños con Ledger al instante. Todo en una sola plataforma.</p>
+      <div class="eyebrow"><span class="eyebrow-dot"></span>Trade Operating System para Latinoamérica</div>
+      <h1 class="hero-h">El sistema operativo del <span class="hl">comercio exterior</span></h1>
+      <p class="hero-p">Importaciones, exportaciones, aduanas, seguros, pagos internacionales, financiamiento, certificaciones y logística coordinados por inteligencia artificial.</p>
       <div class="hero-btns">
-        <button class="btn-sky" onclick="goPg('calc')"><i class="fas fa-calculator" style="margin-right:7px"></i>Presupuesto grandes cargas</button>
-        <button class="btn-ghost" onclick="goPg('chat')"><i class="fas fa-comment-dots" style="margin-right:7px"></i>Cotizar paquete pequeño</button>
+        <button class="btn-sky" onclick="goPg('fasty')"><i class="fas fa-wand-magic-sparkles" style="margin-right:7px"></i>Crear operación con FASTY</button>
+        <button class="btn-ghost" onclick="goPg('twin')"><i class="fas fa-satellite-dish" style="margin-right:7px"></i>Ver operaciones en vivo</button>
       </div>
     </div>
     <div>
-      <div class="hero-card">
-        <div class="hc-row"><span class="hc-lbl">Ejemplo activo — Exportación en curso</span><span class="hc-badge">EN TRÁNSITO</span></div>
+      <div class="hero-card command-card">
+        <div class="hc-row"><span class="hc-lbl">Centro de control global</span><span class="hc-badge">12 OPERACIONES ACTIVAS</span></div>
         <div class="route">
-          <div class="rc"><span class="flag">🇩🇪</span><strong>Múnich</strong><span>Alemania</span></div>
+          <div class="rc"><span class="flag"><i class="fas fa-industry"></i></span><strong>Shenzhen</strong><span>Proveedor</span></div>
           <div class="rline"></div>
-          <div class="rc"><span class="flag">🇪🇨</span><strong>Guayaquil</strong><span>Ecuador</span></div>
+          <div class="rc"><span class="flag"><i class="fas fa-anchor"></i></span><strong>Guayaquil</strong><span>Destino</span></div>
         </div>
         <div class="mstats">
-          <div class="ms"><div class="msv">$48,200</div><div class="msl">Valor CIF</div></div>
-          <div class="ms"><div class="msv">20%</div><div class="msl">Arancel auto</div></div>
-          <div class="ms"><div class="msv">18 días</div><div class="msl">Tránsito</div></div>
+          <div class="ms"><div class="msv">$1.84M</div><div class="msl">Comercio gestionado</div></div>
+          <div class="ms"><div class="msv">74</div><div class="msl">Risk score medio</div></div>
+          <div class="ms"><div class="msv">8.2%</div><div class="msl">Ahorro proyectado</div></div>
         </div>
         <div class="chain-preview">
-          <div class="cp-lbl"><i class="fas fa-link"></i>Custodia blockchain</div>
+          <div class="cp-lbl"><i class="fas fa-route"></i>Flujo de operación en tiempo real</div>
           <div class="cp-row">
-            <div class="cpb cpb1">ORIGEN</div><span class="cparr">→</span>
-            <div class="cpb cpb2">ADUANA</div><span class="cparr">→</span>
-            <div class="cpb cpb3">NAVIERA</div><span class="cparr">→</span>
-            <div class="cpb cpb4">SENAE</div><span class="cparr">→</span>
-            <div class="cpb cpb5">DESTINO</div>
+            <div class="cpb cpb1">PROVEEDOR</div><span class="cparr">→</span>
+            <div class="cpb cpb2">PUERTO</div><span class="cparr">→</span>
+            <div class="cpb cpb3">BUQUE</div><span class="cparr">→</span>
+            <div class="cpb cpb4">ADUANA</div><span class="cparr">→</span>
+            <div class="cpb cpb5">BODEGA</div>
           </div>
         </div>
       </div>
     </div>
   </div>
+  <section class="ops-band">
+    <div class="ops-head">
+      <div>
+        <span class="ops-kicker">Vista ejecutiva</span>
+        <h2>Control total de la cadena comercial</h2>
+      </div>
+      <button class="btn-ghost compact" onclick="goPg('twin')"><i class="fas fa-expand"></i> Abrir centro de operaciones</button>
+    </div>
+    <div class="ops-grid">
+      <div class="ops-map">
+        <div class="map-grid"></div>
+        <span class="map-port port-asia"><i class="fas fa-circle"></i><b>Shenzhen</b></span>
+        <span class="map-port port-eu"><i class="fas fa-circle"></i><b>Hamburgo</b></span>
+        <span class="map-port port-us"><i class="fas fa-circle"></i><b>Miami</b></span>
+        <span class="map-port port-ec"><i class="fas fa-location-dot"></i><b>Guayaquil</b></span>
+        <div class="map-route route-a"></div>
+        <div class="map-route route-b"></div>
+        <div class="map-vessel"><i class="fas fa-ship"></i> FL Pacific 08</div>
+      </div>
+      <div class="ops-feed">
+        <div class="feed-row"><span class="feed-icon green"><i class="fas fa-check"></i></span><div><strong>Documentos verificados</strong><small>BL y certificado de origen anclados</small></div><time>09:42</time></div>
+        <div class="feed-row"><span class="feed-icon amber"><i class="fas fa-triangle-exclamation"></i></span><div><strong>Riesgo regulatorio medio</strong><small>Drones requieren validación ARCOTEL</small></div><time>09:18</time></div>
+        <div class="feed-row"><span class="feed-icon blue"><i class="fas fa-water"></i></span><div><strong>ETA recalculado</strong><small>Arribo estimado en 11 días</small></div><time>08:55</time></div>
+        <div class="feed-row"><span class="feed-icon purple"><i class="fas fa-coins"></i></span><div><strong>Financiamiento preaprobado</strong><small>Línea sugerida por USD 85,000</small></div><time>08:31</time></div>
+      </div>
+    </div>
+  </section>
   <div class="svc-grid">
-    <div class="svc" onclick="goPg('calc')">
-      <div class="svc-icon">🚗</div>
-      <h4>Presupuesto Carga Grande</h4>
-      <p>Vehículos, motos, camiones, maquinaria y más. Calculamos aranceles completos, IVA, FODINFA, flete por contenedor y todos los trámites SENAE.</p>
-      <span class="svc-tag">Desde $5 USD/lb · Contenedor vehículos</span>
+    <div class="svc" onclick="goPg('fasty')">
+      <div class="svc-icon"><i class="fas fa-brain"></i></div>
+      <h4>FASTY Trade AI</h4>
+      <p>Genera clasificación, permisos, impuestos, ruta, riesgos, proveedores, cronograma y rentabilidad desde texto, foto, PDF o audio.</p>
+      <span class="svc-tag">Agente autónomo multimodal</span>
     </div>
-    <div class="svc" onclick="goPg('chat')">
-      <div class="svc-icon">📦</div>
-      <h4>Paquetes Pequeños con Ledger</h4>
-      <p>Zapatos, ropa, cosméticos, electrónicos y más artículos del día a día. Ledger calcula tu envío al instante: $5 USD por libra, sin complicaciones.</p>
-      <span class="svc-tag">$5 USD / libra — rápido y simple</span>
+    <div class="svc" onclick="goPg('market')">
+      <div class="svc-icon"><i class="fas fa-store"></i></div>
+      <h4>Supplier Marketplace</h4>
+      <p>Descubre proveedores internacionales verificados, compara reputación, certificaciones, precios, tiempos y condiciones de compra.</p>
+      <span class="svc-tag">China · Brasil · India · Turquía · EE.UU.</span>
     </div>
-    <div class="svc" onclick="goPg('bc')">
-      <div class="svc-icon">🔗</div>
-      <h4>Rastreo Blockchain</h4>
-      <p>Trazabilidad inmutable de tu envío en cada etapa aduanera. Hashes verificados, smart contracts y timeline en tiempo real desde el origen hasta Ecuador.</p>
-      <span class="svc-tag">Tecnología blockchain</span>
+    <div class="svc" onclick="goPg('twin')">
+      <div class="svc-icon"><i class="fas fa-cubes-stacked"></i></div>
+      <h4>Digital Twin</h4>
+      <p>Visualiza contenedor, buque, puerto, aduana y bodega como una operación digital conectada a documentos y alertas.</p>
+      <span class="svc-tag">Trazabilidad extremo a extremo</span>
     </div>
   </div>
   <div class="kpis">
-    <div class="kpi"><div class="kpi-n">+2,400</div><div class="kpi-l">Importaciones procesadas</div></div>
-    <div class="kpi"><div class="kpi-n">98.2%</div><div class="kpi-l">Precisión arancelaria IA</div></div>
-    <div class="kpi"><div class="kpi-n">34 países</div><div class="kpi-l">Orígenes gestionados</div></div>
-    <div class="kpi"><div class="kpi-n">$180M+</div><div class="kpi-l">Valor total importado</div></div>
+    <div class="kpi"><div class="kpi-n">8</div><div class="kpi-l">Servicios de comercio integrados</div></div>
+    <div class="kpi"><div class="kpi-n">360°</div><div class="kpi-l">Visibilidad operacional</div></div>
+    <div class="kpi"><div class="kpi-n">0–100</div><div class="kpi-l">Risk Score por operación</div></div>
+    <div class="kpi"><div class="kpi-n">&lt;30s</div><div class="kpi-l">Plan comercial generado por IA</div></div>
+  </div>
+</div>
+
+<!-- FASTY TRADE AI -->
+<div id="pg-fasty" class="pg">
+  <div class="wrap trade-wrap">
+    <div class="ph trade-ph">
+      <div>
+        <div class="ph-tag">FASTY Trade AI</div>
+        <h2>Diseña una operación de comercio exterior en segundos</h2>
+        <p>Describe la operación o adjunta evidencia. FASTY estructura el caso, identifica riesgos y genera un plan ejecutable.</p>
+      </div>
+      <span class="live-pill"><i class="fas fa-circle"></i> Agente operativo activo</span>
+    </div>
+
+    <div class="fasty-layout">
+      <section class="fasty-console">
+        <div class="mode-tabs">
+          <button class="mode-tab on" data-mode="text" onclick="setFastyMode('text',this)"><i class="fas fa-keyboard"></i><span>Texto</span></button>
+          <button class="mode-tab" data-mode="image" onclick="setFastyMode('image',this)"><i class="fas fa-camera"></i><span>Foto</span></button>
+          <button class="mode-tab" data-mode="pdf" onclick="setFastyMode('pdf',this)"><i class="fas fa-file-pdf"></i><span>Factura PDF</span></button>
+          <button class="mode-tab" data-mode="audio" onclick="setFastyMode('audio',this)"><i class="fas fa-microphone"></i><span>Audio</span></button>
+        </div>
+
+        <div class="fasty-input-pane on" id="fasty-pane-text">
+          <label for="fasty-prompt">¿Qué operación quieres realizar?</label>
+          <textarea id="fasty-prompt" placeholder="Ejemplo: Quiero importar 300 drones desde Shenzhen a Guayaquil, valor FOB USD 48,000. Necesito saber permisos, impuestos, ruta y rentabilidad.">Quiero importar 300 drones desde Shenzhen a Guayaquil, valor FOB USD 48,000.</textarea>
+          <div class="prompt-examples">
+            <button onclick="useFastyExample('acero')">10 toneladas de acero desde Turquía</button>
+            <button onclick="useFastyExample('laptops')">500 laptops desde Shenzhen</button>
+            <button onclick="useFastyExample('cacao')">Exportar cacao a Países Bajos</button>
+          </div>
+        </div>
+
+        <div class="fasty-input-pane" id="fasty-pane-image">
+          <label class="drop-zone" for="fasty-image">
+            <i class="fas fa-camera"></i>
+            <strong>Sube o toma una foto del producto</strong>
+            <span>FASTY simulará identificación de producto, material, uso y partida arancelaria.</span>
+            <input type="file" id="fasty-image" accept="image/*" capture="environment" onchange="handleFastyFile(this,'image')">
+          </label>
+          <div class="file-status" id="fasty-image-status">Ninguna imagen seleccionada</div>
+        </div>
+
+        <div class="fasty-input-pane" id="fasty-pane-pdf">
+          <label class="drop-zone" for="fasty-pdf">
+            <i class="fas fa-file-invoice"></i>
+            <strong>Sube una factura comercial</strong>
+            <span>Extracción simulada de FOB, peso, Incoterm, proveedor y país de origen.</span>
+            <input type="file" id="fasty-pdf" accept="application/pdf" onchange="handleFastyFile(this,'pdf')">
+          </label>
+          <div class="file-status" id="fasty-pdf-status">Ningún PDF seleccionado</div>
+        </div>
+
+        <div class="fasty-input-pane" id="fasty-pane-audio">
+          <button class="record-btn" id="fasty-record" onclick="toggleFastyRecording()"><i class="fas fa-microphone"></i></button>
+          <strong class="record-title" id="fasty-record-title">Pulsa para dictar tu operación</strong>
+          <p class="record-copy">La demostración convertirá tu instrucción de voz en una solicitud estructurada.</p>
+          <div class="audio-wave" id="fasty-wave"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+
+        <div class="fasty-actions">
+          <div class="agent-capabilities"><i class="fas fa-shield-halved"></i> Aduanas <i class="fas fa-route"></i> Logística <i class="fas fa-chart-line"></i> Rentabilidad</div>
+          <button class="run-fasty" onclick="runFastyAnalysis()"><i class="fas fa-wand-magic-sparkles"></i> Generar plan operativo</button>
+        </div>
+      </section>
+
+      <aside class="fasty-progress">
+        <div class="agent-avatar"><span>F</span><i class="fas fa-bolt"></i></div>
+        <h3>Motor de decisión FASTY</h3>
+        <p>Convierte una intención comercial en un expediente operativo verificable.</p>
+        <div class="agent-steps">
+          <div class="agent-step ready" id="agent-step-1"><i class="fas fa-check"></i><span><b>Interpretar operación</b><small>Producto, origen, volumen y objetivo</small></span></div>
+          <div class="agent-step" id="agent-step-2"><i class="fas fa-barcode"></i><span><b>Clasificar mercancía</b><small>Partida y requisitos técnicos</small></span></div>
+          <div class="agent-step" id="agent-step-3"><i class="fas fa-scale-balanced"></i><span><b>Evaluar regulación</b><small>Permisos, impuestos y alertas</small></span></div>
+          <div class="agent-step" id="agent-step-4"><i class="fas fa-ship"></i><span><b>Diseñar logística</b><small>Ruta, naviera y cronograma</small></span></div>
+          <div class="agent-step" id="agent-step-5"><i class="fas fa-sack-dollar"></i><span><b>Calcular viabilidad</b><small>Costo total, margen y financiamiento</small></span></div>
+        </div>
+      </aside>
+    </div>
+
+    <section class="fasty-results" id="fasty-results">
+      <div class="result-head">
+        <div><span class="ops-kicker">Expediente generado</span><h2 id="fasty-result-title">Importación de 300 drones desde Shenzhen</h2></div>
+        <div class="risk-gauge" id="fasty-risk-gauge"><strong>68</strong><span>Risk Score</span></div>
+      </div>
+      <div class="result-grid">
+        <article class="result-panel span-2">
+          <div class="panel-title"><i class="fas fa-clipboard-check"></i> Resumen ejecutivo</div>
+          <p id="fasty-summary">Operación viable con control regulatorio medio. Requiere validar homologación de radiofrecuencia, documentación técnica y uso previsto antes del embarque.</p>
+          <div class="summary-metrics">
+            <div><span>Partida sugerida</span><strong id="fasty-tariff">8806.22.00</strong></div>
+            <div><span>Costo aterrizado</span><strong id="fasty-landed">$66,940</strong></div>
+            <div><span>Tiempo estimado</span><strong id="fasty-days">32–41 días</strong></div>
+            <div><span>Margen proyectado</span><strong id="fasty-margin">24.6%</strong></div>
+          </div>
+        </article>
+        <article class="result-panel">
+          <div class="panel-title"><i class="fas fa-stamp"></i> Permisos</div>
+          <ul class="check-list" id="fasty-permits">
+            <li><i class="fas fa-circle-check"></i> Registro de importador</li>
+            <li><i class="fas fa-triangle-exclamation"></i> Validación ARCOTEL</li>
+            <li><i class="fas fa-circle-check"></i> Ficha técnica del fabricante</li>
+          </ul>
+        </article>
+        <article class="result-panel">
+          <div class="panel-title"><i class="fas fa-coins"></i> Tributos estimados</div>
+          <div class="cost-stack" id="fasty-costs">
+            <div><span>FOB</span><b>$48,000</b></div>
+            <div><span>Flete + seguro</span><b>$4,720</b></div>
+            <div><span>Arancel + FODINFA</span><b>$2,870</b></div>
+            <div><span>IVA</span><b>$8,340</b></div>
+            <div><span>Logística local</span><b>$3,010</b></div>
+          </div>
+        </article>
+        <article class="result-panel">
+          <div class="panel-title"><i class="fas fa-route"></i> Ruta recomendada</div>
+          <div class="mini-route"><b>Shenzhen</b><span></span><b>Guayaquil</b></div>
+          <p class="panel-note">Yantian → transbordo Manzanillo → Contecon Guayaquil. Modalidad LCL prioritaria por volumen.</p>
+        </article>
+        <article class="result-panel">
+          <div class="panel-title"><i class="fas fa-building"></i> Proveedores sugeridos</div>
+          <div class="supplier-mini"><span>SV</span><div><b>SkyVision Robotics</b><small>4.8 · Verificado · Shenzhen</small></div></div>
+          <div class="supplier-mini"><span>AT</span><div><b>AeroTech Global</b><small>4.7 · ISO 9001 · Dongguan</small></div></div>
+        </article>
+        <article class="result-panel span-2">
+          <div class="panel-title"><i class="fas fa-calendar-days"></i> Cronograma autónomo</div>
+          <div class="schedule-track">
+            <div class="schedule-item done"><span>1</span><b>Validar proveedor</b><small>Día 0–2</small></div>
+            <div class="schedule-item"><span>2</span><b>Permisos previos</b><small>Día 3–8</small></div>
+            <div class="schedule-item"><span>3</span><b>Pago y producción</b><small>Día 9–16</small></div>
+            <div class="schedule-item"><span>4</span><b>Embarque</b><small>Día 17–35</small></div>
+            <div class="schedule-item"><span>5</span><b>Aduana y entrega</b><small>Día 36–41</small></div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- DIGITAL TWIN / OPERATIONS -->
+<div id="pg-twin" class="pg">
+  <div class="wrap trade-wrap">
+    <div class="ph trade-ph">
+      <div><div class="ph-tag">Digital Twin</div><h2>Centro de operaciones en tiempo real</h2><p>Una representación digital del embarque conectada a riesgos, documentos y eventos logísticos.</p></div>
+      <select class="operation-select" id="operation-select" onchange="changeTwinOperation(this.value)">
+        <option value="drones">FL-2606-DRN · Drones · China → Ecuador</option>
+        <option value="steel">FL-2606-STL · Acero · Turquía → Ecuador</option>
+        <option value="cacao">FL-2606-CCO · Cacao · Ecuador → Países Bajos</option>
+      </select>
+    </div>
+    <div class="twin-kpis">
+      <div><span>Estado</span><strong class="green" id="twin-status">En tránsito</strong></div>
+      <div><span>ETA</span><strong id="twin-eta">11 días</strong></div>
+      <div><span>Ubicación</span><strong id="twin-location">Pacífico Norte</strong></div>
+      <div><span>Risk Score</span><strong class="amber" id="twin-risk">68 / 100</strong></div>
+      <div><span>Documentos</span><strong id="twin-docs">7 / 8</strong></div>
+    </div>
+    <div class="twin-layout">
+      <section class="twin-scene">
+        <div class="ocean-lines"></div>
+        <div class="port-node origin"><i class="fas fa-industry"></i><span id="twin-origin">Shenzhen</span></div>
+        <div class="port-node destination"><i class="fas fa-warehouse"></i><span id="twin-destination">Guayaquil</span></div>
+        <div class="sea-lane"></div>
+        <div class="vessel-model" id="vessel-model"><i class="fas fa-ship"></i><span>MSC Vega</span><small>12.4 kn</small></div>
+        <div class="container-model"><i class="fas fa-box"></i><span>MSCU 842019-4</span><small>Temperatura 24°C · Sello intacto</small></div>
+        <div class="scene-controls">
+          <button class="on" onclick="setTwinLayer('route',this)"><i class="fas fa-route"></i> Ruta</button>
+          <button onclick="setTwinLayer('weather',this)"><i class="fas fa-cloud-sun"></i> Clima</button>
+          <button onclick="setTwinLayer('risk',this)"><i class="fas fa-shield-halved"></i> Riesgo</button>
+        </div>
+      </section>
+      <aside class="twin-side">
+        <div class="panel-title"><i class="fas fa-tower-broadcast"></i> Eventos en vivo</div>
+        <div class="event-stream" id="twin-events">
+          <div><time>10:24</time><span class="event-dot green"></span><p><b>Telemetría recibida</b><small>Posición y sello confirmados</small></p></div>
+          <div><time>09:48</time><span class="event-dot blue"></span><p><b>Documento anclado</b><small>Bill of Lading · hash 8f31…aa90</small></p></div>
+          <div><time>08:16</time><span class="event-dot amber"></span><p><b>ETA actualizado</b><small>Congestión moderada en Manzanillo</small></p></div>
+          <div><time>Ayer</time><span class="event-dot purple"></span><p><b>Seguro activado</b><small>Cobertura puerta a puerta</small></p></div>
+        </div>
+      </aside>
+    </div>
+    <div class="operations-bottom">
+      <section class="document-vault">
+        <div class="panel-title"><i class="fas fa-fingerprint"></i> Bóveda documental blockchain</div>
+        <div class="vault-grid">
+          <button onclick="verifyTradeDocument(this,'Factura comercial')"><i class="fas fa-file-invoice"></i><span>Factura comercial<small>Hash verificado</small></span><b>OK</b></button>
+          <button onclick="verifyTradeDocument(this,'Bill of Lading')"><i class="fas fa-file-contract"></i><span>Bill of Lading<small>Hash verificado</small></span><b>OK</b></button>
+          <button onclick="verifyTradeDocument(this,'Certificado de origen')"><i class="fas fa-certificate"></i><span>Cert. de origen<small>Hash verificado</small></span><b>OK</b></button>
+          <button class="pending" onclick="verifyTradeDocument(this,'Certificado técnico')"><i class="fas fa-microchip"></i><span>Cert. técnico<small>Pendiente de firma</small></span><b>!</b></button>
+        </div>
+      </section>
+      <section class="risk-panel">
+        <div class="panel-title"><i class="fas fa-shield-halved"></i> Inteligencia de riesgo</div>
+        <div class="risk-score-large"><strong>68</strong><span>Riesgo medio</span></div>
+        <div class="risk-bars">
+          <div><span>País</span><i><b style="width:42%"></b></i><em>42</em></div>
+          <div><span>Producto</span><i><b style="width:78%"></b></i><em>78</em></div>
+          <div><span>Proveedor</span><i><b style="width:24%"></b></i><em>24</em></div>
+          <div><span>Regulación</span><i><b style="width:72%"></b></i><em>72</em></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- MARKETPLACE -->
+<div id="pg-market" class="pg">
+  <div class="wrap trade-wrap">
+    <div class="ph trade-ph">
+      <div><div class="ph-tag">Supplier Marketplace</div><h2>Proveedores internacionales verificados</h2><p>Compara reputación, certificaciones, capacidad, precio y riesgo antes de negociar.</p></div>
+      <button class="btn-sky" onclick="showMarketplaceNotice()"><i class="fas fa-building-circle-check"></i> Solicitar verificación</button>
+    </div>
+    <div class="market-toolbar">
+      <div class="market-search"><i class="fas fa-magnifying-glass"></i><input id="market-search" placeholder="Buscar producto, proveedor o país" oninput="filterSuppliers()"></div>
+      <select id="market-country" onchange="filterSuppliers()"><option value="all">Todos los países</option><option value="china">China</option><option value="brasil">Brasil</option><option value="india">India</option><option value="turquia">Turquía</option><option value="usa">Estados Unidos</option></select>
+      <select id="market-category" onchange="filterSuppliers()"><option value="all">Todas las categorías</option><option value="technology">Tecnología</option><option value="industrial">Industrial</option><option value="food">Alimentos</option><option value="textile">Textil</option></select>
+    </div>
+    <div class="supplier-grid" id="supplier-grid">
+      <article class="supplier-card" data-country="china" data-category="technology" data-search="skyvision robotics drones tecnologia shenzhen">
+        <div class="supplier-cover tech"><span>SV</span><b><i class="fas fa-badge-check"></i> Verificado</b></div>
+        <div class="supplier-body"><h3>SkyVision Robotics</h3><p>Shenzhen, China · Drones y sensores</p><div class="rating"><strong>4.8</strong><span>★★★★★</span><small>126 operaciones</small></div><div class="supplier-tags"><span>ISO 9001</span><span>OEM</span><span>Trade Assurance</span></div><div class="supplier-facts"><div><small>MOQ</small><b>100 u.</b></div><div><small>Lead time</small><b>18 días</b></div><div><small>Risk</small><b class="green">22</b></div></div><button onclick="openSupplier('SkyVision Robotics')">Evaluar proveedor</button></div>
+      </article>
+      <article class="supplier-card" data-country="turquia" data-category="industrial" data-search="anatolia steel acero industrial turquia">
+        <div class="supplier-cover steel"><span>AS</span><b><i class="fas fa-badge-check"></i> Verificado</b></div>
+        <div class="supplier-body"><h3>Anatolia Steel Works</h3><p>Izmir, Turquía · Acero estructural</p><div class="rating"><strong>4.7</strong><span>★★★★★</span><small>89 operaciones</small></div><div class="supplier-tags"><span>EN 10025</span><span>Mill Test</span><span>SGS</span></div><div class="supplier-facts"><div><small>MOQ</small><b>5 ton.</b></div><div><small>Lead time</small><b>24 días</b></div><div><small>Risk</small><b class="green">28</b></div></div><button onclick="openSupplier('Anatolia Steel Works')">Evaluar proveedor</button></div>
+      </article>
+      <article class="supplier-card" data-country="brasil" data-category="food" data-search="verde brasil foods alimentos cafe">
+        <div class="supplier-cover food"><span>VB</span><b><i class="fas fa-badge-check"></i> Verificado</b></div>
+        <div class="supplier-body"><h3>Verde Brasil Foods</h3><p>São Paulo, Brasil · Alimentos y café</p><div class="rating"><strong>4.9</strong><span>★★★★★</span><small>203 operaciones</small></div><div class="supplier-tags"><span>HACCP</span><span>Orgánico</span><span>FDA</span></div><div class="supplier-facts"><div><small>MOQ</small><b>1 pallet</b></div><div><small>Lead time</small><b>12 días</b></div><div><small>Risk</small><b class="green">16</b></div></div><button onclick="openSupplier('Verde Brasil Foods')">Evaluar proveedor</button></div>
+      </article>
+      <article class="supplier-card" data-country="india" data-category="textile" data-search="jaipur textile collective textiles india">
+        <div class="supplier-cover textile"><span>JT</span><b><i class="fas fa-badge-check"></i> Verificado</b></div>
+        <div class="supplier-body"><h3>Jaipur Textile Collective</h3><p>Jaipur, India · Textiles y confección</p><div class="rating"><strong>4.6</strong><span>★★★★☆</span><small>74 operaciones</small></div><div class="supplier-tags"><span>GOTS</span><span>OEKO-TEX</span><span>SEDEX</span></div><div class="supplier-facts"><div><small>MOQ</small><b>500 u.</b></div><div><small>Lead time</small><b>21 días</b></div><div><small>Risk</small><b class="amber">39</b></div></div><button onclick="openSupplier('Jaipur Textile Collective')">Evaluar proveedor</button></div>
+      </article>
+      <article class="supplier-card" data-country="usa" data-category="technology" data-search="northstar components tecnologia usa miami">
+        <div class="supplier-cover components"><span>NC</span><b><i class="fas fa-badge-check"></i> Verificado</b></div>
+        <div class="supplier-body"><h3>Northstar Components</h3><p>Miami, EE.UU. · Componentes electrónicos</p><div class="rating"><strong>4.8</strong><span>★★★★★</span><small>158 operaciones</small></div><div class="supplier-tags"><span>RoHS</span><span>UL</span><span>ISO 14001</span></div><div class="supplier-facts"><div><small>MOQ</small><b>50 u.</b></div><div><small>Lead time</small><b>7 días</b></div><div><small>Risk</small><b class="green">14</b></div></div><button onclick="openSupplier('Northstar Components')">Evaluar proveedor</button></div>
+      </article>
+      <article class="supplier-card" data-country="china" data-category="industrial" data-search="guangdong machinery maquinaria industrial china">
+        <div class="supplier-cover machinery"><span>GM</span><b><i class="fas fa-badge-check"></i> Verificado</b></div>
+        <div class="supplier-body"><h3>Guangdong Machinery</h3><p>Foshan, China · Maquinaria industrial</p><div class="rating"><strong>4.5</strong><span>★★★★☆</span><small>61 operaciones</small></div><div class="supplier-tags"><span>CE</span><span>ISO 9001</span><span>Inspection</span></div><div class="supplier-facts"><div><small>MOQ</small><b>1 equipo</b></div><div><small>Lead time</small><b>35 días</b></div><div><small>Risk</small><b class="amber">44</b></div></div><button onclick="openSupplier('Guangdong Machinery')">Evaluar proveedor</button></div>
+      </article>
+    </div>
   </div>
 </div>
 
@@ -648,6 +921,7 @@
 <script src="src/auth.js"></script>
 <script src="src/database.js"></script>
 <script src="src/gemini.js"></script>
+<script src="src/trade-os.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
