@@ -1,6 +1,9 @@
 # FastLedger
 
-Plataforma web para importaciones inteligentes hacia Ecuador. FastLedger combina calculadoras de costos, asistencia basada en IA y trazabilidad tipo blockchain para ayudar a personas, PyMEs y emprendedores a estimar, organizar y documentar procesos de importacion.
+Trade Operating System para coordinar importaciones, exportaciones, aduanas,
+seguros, pagos internacionales, financiamiento, certificaciones y logistica.
+FastLedger combina automatizacion basada en IA, control operativo y
+trazabilidad documental.
 
 ## Propuesta
 
@@ -14,6 +17,10 @@ FastLedger busca reducir la incertidumbre del comercio internacional al Ecuador.
 - Flujo de contratacion con codigo de orden.
 - Concepto de trazabilidad blockchain para registrar hitos logisticos y aduaneros.
 - Material comercial y tecnico en PDF para presentar el proyecto.
+- FASTY Trade AI con entrada demostrativa por texto, imagen, PDF y audio.
+- Dashboard ejecutivo y gemelo digital de operaciones.
+- Marketplace B2B de proveedores internacionales verificados.
+- Risk Score y bóveda documental con verificación de hashes.
 
 ## Estructura del repositorio
 
@@ -29,12 +36,14 @@ FASTLEDGER/
 |  |- database.js
 |  |- gemini.js
 |  |- config.example.js
+|  |- trade-os.js
 |- tests/
 |  |- calculator.test.js
 |- docs/
 |  |- formulas.md
 |  |- database.md
 |  |- gemini.md
+|  |- trade-os.md
 |- Proyecto FastLedger - Propuesta Comercial y Tecnica.pdf
 |- Whitepaper FastLedger V3 - Importacion Inteligente.pdf
 |- Resumen Ejecutivo FastLedger.pdf
