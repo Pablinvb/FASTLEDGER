@@ -22,9 +22,12 @@ function round(value) {
   });
 
   assert.equal(round(result.flete), 2800);
-  assert.equal(round(result.cif), 23100);
-  assert.equal(round(result.eur1Desc), 1155);
-  assert.equal(round(result.total), 32600);
+  assert.equal(round(result.originCharges), 200);
+  assert.equal(round(result.cif), 23345);
+  assert.equal(round(result.eur1Desc), 1167);
+  assert.equal(round(result.localCharges), 140);
+  assert.equal(round(result.total), 33068);
+  assert.equal(result.intermediario, "Agente de aduana");
 }
 
 {
@@ -37,8 +40,11 @@ function round(value) {
   });
 
   assert.equal(round(result.flete), 725);
-  assert.equal(round(result.cif), 5800);
-  assert.equal(round(result.total), 8427);
+  assert.equal(round(result.originCharges), 60);
+  assert.equal(round(result.cif), 5872);
+  assert.equal(round(result.localCharges), 90);
+  assert.equal(round(result.total), 8604);
+  assert.equal(result.regimen, "Importacion a consumo - Regimen 10");
 }
 
 {
@@ -56,6 +62,29 @@ function round(value) {
   assert.equal(result.pctAran, 0);
   assert.equal(result.ivaRate, 0.05);
   assert.equal(result.inenCosto, 850);
+}
+
+{
+  const exw = calculateImportEstimate({
+    tipo: "maquinaria",
+    pais: "CN",
+    fob: 5000,
+    lbs: 100,
+    modal: "maritimo",
+    incoterm: "EXW"
+  });
+  const cif = calculateImportEstimate({
+    tipo: "maquinaria",
+    pais: "CN",
+    fob: 5000,
+    lbs: 100,
+    modal: "maritimo",
+    incoterm: "CIF"
+  });
+
+  assert.equal(round(exw.originCharges), 200);
+  assert.equal(round(cif.originCharges), 0);
+  assert.ok(exw.total > cif.total);
 }
 
 assert.equal(calculateLedgerPackage(4), 20);

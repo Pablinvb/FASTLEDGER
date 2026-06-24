@@ -35,6 +35,7 @@
     const fob = Number(input.fob || 0);
     const lbs = Number(input.lbs || 10);
     const modal = input.modal || "maritimo";
+    const incoterm = String(input.incoterm || "FOB").toUpperCase();
     const motor = input.motor || "gasolina";
     const cc = Number(input.cc || 2000);
     const uso = input.uso || "particular";
@@ -87,8 +88,12 @@
       flete = Math.max(20, lbs * TARIFA_LB_CARGA * df * mf);
     }
 
-    const seguro = fob * 0.015;
-    const cif = fob + flete + seguro;
+    const originCharges =
+      incoterm === "EXW" ? Math.max(120, fob * 0.04) :
+      incoterm === "FOB" ? Math.max(60, fob * 0.01) : 0;
+    const insuredBase = fob + flete + originCharges;
+    const seguro = insuredBase * 0.015;
+    const cif = fob + originCharges + flete + seguro;
     if (tipo === "auto" && eur1 === "si" && UE.includes(pais) && motor !== "electrico") {
       eur1Desc = cif * 0.05;
     }
@@ -98,11 +103,18 @@
     const fodinfa = cif * 0.005;
     const iva = (cif + aranNeto + fodinfa) * ivaRate;
     const salv = (D.salv_r || 0) * cif;
-    const agente = D.agente;
+    const regimen = D.tipo === "vehiculo" || D.tipo === "carga_pesada"
+      ? "Importacion a consumo - Regimen 10"
+      : "Courier / trafico postal";
+    const intermediario = D.tipo === "vehiculo" || D.tipo === "carga_pesada"
+      ? "Agente de aduana"
+      : "Courier autorizado";
+    const agente = D.tipo === "vehiculo" || D.tipo === "carga_pesada" ? D.agente : 0;
     const almacen = Math.round(cif * (D.almacen_r || 0.01));
+    const localCharges = Math.max(90, Math.round(cif * 0.006));
     const transp = D.transp;
     const docs = D.docs;
-    const total = cif + aranNeto + fodinfa + iva + salv + rodaje + agente + almacen + transp + inenCosto + docs;
+    const total = cif + aranNeto + fodinfa + iva + salv + rodaje + agente + almacen + localCharges + transp + inenCosto + docs;
 
     return {
       tipo,
@@ -110,8 +122,10 @@
       fob,
       lbs,
       modal,
+      incoterm,
       pctAran,
       ivaRate,
+      originCharges,
       flete,
       seguro,
       cif,
@@ -123,7 +137,10 @@
       salv,
       rodaje,
       agente,
+      regimen,
+      intermediario,
       almacen,
+      localCharges,
       transp,
       inenCosto,
       docs,

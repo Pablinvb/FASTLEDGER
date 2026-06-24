@@ -18,8 +18,24 @@ operativo estructurado. No inventes leyes, permisos, tasas, proveedores ni
 datos en tiempo real. Cuando un dato deba validarse, incluyelo como supuesto o
 riesgo. Los proveedores sugeridos son candidatos de investigacion, no
 recomendaciones verificadas. Devuelve exclusivamente JSON valido conforme al
-schema solicitado. Incluye siempre un descargo indicando que la clasificacion
-arancelaria y normativa deben validarse con un agente y fuentes oficiales.
+schema solicitado.
+
+Integra siempre estos criterios operativos:
+- Diferencia courier/paquete pequeno de importacion a consumo o regimen 10.
+- Si es carga comercial, vehiculos, maquinaria o contenedor, menciona agente de
+  aduana, DAI, bodegaje, gastos locales, transporte interno y seguro.
+- Desglosa costos con FOB, gastos en origen segun Incoterm, flete, seguro,
+  CIF, ad-valorem, FODINFA, IVA, agente, bodegaje, gastos locales y margen.
+- Recomienda seguro desde origen hasta bodega/destino final del cliente.
+- Antes de importar, exige revision previa de producto, partida arancelaria,
+  restricciones, documentos de control previo, pais de origen, proveedor y
+  autorizacion de distribucion cuando exista marca.
+- Para exportacion desde Ecuador, aclara que normalmente no se liquidan
+  tributos de importacion en Ecuador, pero si aplican documentos, certificados,
+  logistica, seguro e Incoterm.
+
+Incluye siempre un descargo indicando que la clasificacion arancelaria y
+normativa deben validarse con un agente y fuentes oficiales.
 """.strip()
 
 
@@ -136,7 +152,11 @@ class GeminiService:
                 "Analisis preliminar generado sin Gemini. Configura GEMINI_API_KEY "
                 "para obtener un expediente detallado."
             ),
-            permits=["Registro del operador", "Validacion tecnica y regulatoria"],
+            permits=[
+                "Registro del operador",
+                "Revision previa de restricciones y documentos de control",
+                "Agente de aduana o courier segun regimen",
+            ],
             regulatory_risks=["Clasificacion y permisos pendientes de validacion oficial"],
             risk_score=risk,
             estimated_days_min=25,
@@ -144,12 +164,24 @@ class GeminiService:
             estimated_total=0,
             projected_margin_percent=0,
             route=[origin, "Puerto por confirmar", "Destino por confirmar"],
-            costs=[{"label": "Costo pendiente de datos", "amount": 0}],
+            costs=[
+                {"label": "FOB pendiente de confirmar", "amount": 0},
+                {"label": "Flete internacional pendiente", "amount": 0},
+                {"label": "Seguro puerta a puerta pendiente", "amount": 0},
+                {"label": "Gastos locales, bodegaje y agente pendientes", "amount": 0},
+            ],
             suppliers=[],
             carriers=[],
             financing_options=["Evaluacion de credito comercial"],
-            timeline=["Validar producto", "Confirmar permisos", "Cotizar logistica"],
-            assumptions=["No se recibieron datos completos de FOB, peso e Incoterm"],
+            timeline=[
+                "Validar producto, proveedor y marca",
+                "Confirmar partida, restricciones y permisos",
+                "Cotizar flete, seguro, bodegaje, agente y transporte interno",
+            ],
+            assumptions=[
+                "No se recibieron datos completos de FOB, peso e Incoterm",
+                "La viabilidad depende de revision previa con agente de aduana y fuentes oficiales",
+            ],
             disclaimer=(
                 "Estimacion preliminar. Valida clasificacion, tributos y permisos "
                 "con SENAE, autoridades competentes y un agente de aduana."

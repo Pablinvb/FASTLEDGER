@@ -3,35 +3,35 @@
     drones: {
       prompt: "Quiero importar 300 drones desde Shenzhen a Guayaquil, valor FOB USD 48,000.",
       title: "Importación de 300 drones desde Shenzhen",
-      summary: "Operación viable con control regulatorio medio. Requiere validar homologación de radiofrecuencia, documentación técnica y uso previsto antes del embarque.",
+      summary: "Operación viable solo con revisión previa. Validar homologación de radiofrecuencia, documentación técnica, uso previsto, Incoterm, seguro puerta a puerta y costos locales antes del embarque.",
       tariff: "8806.22.00",
       landed: "$66,940",
       days: "32–41 días",
       margin: "24.6%",
       risk: 68,
-      permits: ["Registro de importador", "Validación ARCOTEL", "Ficha técnica del fabricante"]
+      permits: ["Registro de importador", "Validación ARCOTEL", "Ficha técnica del fabricante", "Agente de aduana para régimen 10"]
     },
     steel: {
       prompt: "Quiero importar 10 toneladas de acero estructural desde Turquía a Ecuador.",
       title: "Importación de 10 toneladas de acero desde Turquía",
-      summary: "Operación industrial viable. FASTY recomienda inspección preembarque, certificado de colada y validación de medidas antidumping antes de emitir la orden.",
+      summary: "Operación industrial viable. FASTY recomienda inspección preembarque, certificado de colada, seguro hasta bodega, gastos locales y validación de medidas antidumping antes de emitir la orden.",
       tariff: "7216.50.00",
       landed: "$31,880",
       days: "38–46 días",
       margin: "18.2%",
       risk: 54,
-      permits: ["Registro de importador", "Certificado de calidad", "Mill Test Certificate"]
+      permits: ["Registro de importador", "Certificado de calidad", "Mill Test Certificate", "Agente de aduana y DAI"]
     },
     laptops: {
       prompt: "Quiero importar 500 laptops desde Shenzhen a Guayaquil.",
       title: "Importación de 500 laptops desde Shenzhen",
-      summary: "Operación de tecnología con riesgo bajo-medio. Validar etiquetado, baterías de litio, garantía internacional y clasificación exacta de accesorios incluidos.",
+      summary: "Operación de tecnología con riesgo bajo-medio. Validar etiquetado, baterías de litio, garantía internacional, autorización de marca si aplica, seguro y clasificación exacta de accesorios incluidos.",
       tariff: "8471.30.00",
       landed: "$214,600",
       days: "25–34 días",
       margin: "21.8%",
       risk: 43,
-      permits: ["Registro de importador", "UN 38.3 para baterías", "Factura y lista de empaque"]
+      permits: ["Registro de importador", "UN 38.3 para baterías", "Factura y lista de empaque", "Revisión de marca y proveedor"]
     },
     cacao: {
       prompt: "Quiero exportar 25 toneladas de cacao fino desde Ecuador a Países Bajos.",

@@ -729,8 +729,9 @@
           <div class="csec">
             <div class="csec-ttl">📦 Valor de la Mercancía</div>
             <div class="cl"><span class="cn"><i class="fas fa-tag"></i>Valor FOB declarado</span><span class="cv cv-dim" id="r-fob">—</span></div>
+            <div class="cl"><span class="cn"><i class="fas fa-boxes-packing"></i>Gastos en origen</span><span class="cv cv-sky" id="r-origen">—</span></div>
             <div class="cl"><span class="cn"><i class="fas fa-ship"></i>Flete internacional</span><span class="cv cv-sky" id="r-flete">—</span></div>
-            <div class="cl"><span class="cn"><i class="fas fa-shield-alt"></i>Seguro (1.5% s/CIF)</span><span class="cv cv-sky" id="r-seg">—</span></div>
+            <div class="cl"><span class="cn"><i class="fas fa-shield-alt"></i>Seguro puerta a puerta</span><span class="cv cv-sky" id="r-seg">—</span></div>
             <div class="cl bold-row"><span class="cn"><i class="fas fa-equals"></i>Valor CIF total</span><span class="cv" id="r-cif">—</span></div>
           </div>
           <div class="csec">
@@ -744,8 +745,10 @@
           </div>
           <div class="csec">
             <div class="csec-ttl">📋 Trámites y Servicios</div>
+            <div class="cl"><span class="cn"><i class="fas fa-scale-balanced"></i>Régimen / intermediario</span><span class="cv cv-grn" id="r-regimen">—</span></div>
             <div class="cl"><span class="cn"><i class="fas fa-user-tie"></i>Agente de aduana</span><span class="cv cv-grn" id="r-agente">—</span></div>
             <div class="cl"><span class="cn"><i class="fas fa-warehouse"></i>Almacenaje temporal</span><span class="cv cv-grn" id="r-almacen">—</span></div>
+            <div class="cl"><span class="cn"><i class="fas fa-anchor"></i>Gastos locales / portuarios</span><span class="cv cv-grn" id="r-locales">—</span></div>
             <div class="cl"><span class="cn"><i class="fas fa-truck"></i>Transporte interno</span><span class="cv cv-grn" id="r-transp">—</span></div>
             <div class="cl" id="row-inen" style="display:none"><span class="cn"><i class="fas fa-certificate"></i>Homologación INEN</span><span class="cv cv-amb" id="r-inen">—</span></div>
             <div class="cl"><span class="cn"><i class="fas fa-file-contract"></i>Documentos varios</span><span class="cv cv-grn" id="r-docs">—</span></div>
@@ -759,6 +762,10 @@
           <div class="ia-box">
             <strong><i class="fas fa-robot" style="margin-right:5px"></i>Análisis IA: </strong>
             <span id="r-ia">Selecciona el tipo de mercancía para ver el análisis.</span>
+          </div>
+          <div class="ia-box">
+            <strong><i class="fas fa-clipboard-check" style="margin-right:5px"></i>Revisión previa: </strong>
+            <span id="r-precheck">FASTY validará restricciones, documentos de control previo, permisos y viabilidad antes del embarque.</span>
           </div>
           <button class="checkout-btn" id="checkout-cta" style="display:none" onclick="openCheckout()">
             <i class="fas fa-shopping-cart" style="margin-right:8px"></i>Proceder a contratación del servicio
@@ -884,6 +891,8 @@
           <div class="qpill" onclick="quickQ('Necesito el número de contacto de FastLedger')">📞 Contacto FastLedger</div>
           <div class="qpill" onclick="quickQ('¿Cuánto tiempo demora en llegar un paquete desde USA a Ecuador?')">⏱️ Tiempos de entrega</div>
           <div class="qpill" onclick="quickQ('¿Cómo funciona el proceso de compra y el código de orden?')">🛒 ¿Cómo comprar?</div>
+          <div class="qpill" onclick="quickQ('¿Necesito agente de aduana o courier para importar?')">🛃 Agente o courier</div>
+          <div class="qpill" onclick="quickQ('Quiero importar medicamentos, ¿se puede?')">⚕️ Revisar restricciones</div>
           <div class="qpill" onclick="quickQ('¿Por qué Ecuador prohíbe los carros usados?')">🚫 Carros usados</div>
         </div>
       </div>

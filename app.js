@@ -254,11 +254,13 @@ function renderSum(){
   const lbs=parseFloat(document.getElementById('s-peso')?.value)||0;
   const pais=document.getElementById('s-pais')?.value||'';
   const modal=document.getElementById('s-modal')?.value||'';
-  const mNm={'maritimo':'Marítimo FCL','lcl':'Marítimo LCL','aereo':'Aéreo'}[modal]||modal;
+  const inco=document.getElementById('s-inco')?.value||'FOB';
+  const mNm={'maritimo':'Maritimo FCL','lcl':'Maritimo LCL','aereo':'Aereo'}[modal]||modal;
   document.getElementById('sum-body').innerHTML=
-    `<strong>Mercancía:</strong> ${TIPO_NAMES[tipo]||'—'}<br>`+
-    `<strong>FOB:</strong> $${fob.toLocaleString()} &nbsp;·&nbsp; <strong>Peso:</strong> ${lbs.toLocaleString()} lb<br>`+
-    `<strong>Origen:</strong> ${PAIS_NAMES[pais]||pais} &nbsp;·&nbsp; <strong>Modo:</strong> ${mNm}`;
+    `<strong>Mercancia:</strong> ${TIPO_NAMES[tipo]||'-'}<br>`+
+    `<strong>FOB:</strong> $${fob.toLocaleString()} &nbsp;|&nbsp; <strong>Peso:</strong> ${lbs.toLocaleString()} lb<br>`+
+    `<strong>Origen:</strong> ${PAIS_NAMES[pais]||pais} &nbsp;|&nbsp; <strong>Modo:</strong> ${mNm}<br>`+
+    `<strong>Incoterm:</strong> ${inco} &nbsp;|&nbsp; <strong>Revision previa:</strong> restricciones, permisos y documentos`;
 }
 
 function onTipoChange(){
@@ -328,12 +330,34 @@ function fmt(n){return '$'+Math.round(n).toLocaleString('en-US');}
 function setEl(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
 function showRow(id,show){const e=document.getElementById(id);if(e)e.style.display=show?'flex':'none';}
 
+function getPrecheckMessage(tipo, pais, incoterm){
+  const origin = PAIS_NAMES[pais] || pais;
+  const base = 'Antes de comprar: validar partida arancelaria, restricciones, documentos de control previo y autorizaciones de marca/distribucion.';
+  const insurance = 'Mantener seguro desde origen hasta bodega del cliente por robo, dano o perdida.';
+  const inco = incoterm === 'EXW'
+    ? 'EXW agrega gastos en origen: retiro, manejo, documentos y entrega al puerto.'
+    : incoterm === 'CIF'
+      ? 'CIF incluye flete y seguro internacional, pero aun faltan gastos locales, bodegaje, agente y transporte interno.'
+      : 'FOB requiere sumar flete, seguro internacional, gastos locales y transporte interno.';
+  if(tipo === 'auto' || tipo === 'moto' || tipo === 'camion'){
+    return `${base} Vehiculos usados no son viables; confirmar que sea 0 km y que los certificados esten completos. ${inco} ${insurance}`;
+  }
+  if(tipo === 'maquinaria'){
+    return `${base} Revisar certificaciones tecnicas, manuales, voltaje, repuestos, uso productivo y viabilidad desde ${origin}. ${inco} ${insurance}`;
+  }
+  if(tipo === 'acero'){
+    return `${base} Revisar certificado de colada, norma tecnica, medidas antidumping y proveedor antes de embarcar desde ${origin}. ${inco} ${insurance}`;
+  }
+  return `${base} Revisar etiquetado, certificados tecnicos y proveedor antes de embarcar desde ${origin}. ${inco} ${insurance}`;
+}
+
 function calcular(){
   const tipo =document.getElementById('s-tipo')?.value||'';
   const pais =document.getElementById('s-pais')?.value||'DE';
   const fob  =parseFloat(document.getElementById('s-fob')?.value)||0;
   const lbs  =parseFloat(document.getElementById('s-peso')?.value)||10;
   const modal=document.getElementById('s-modal')?.value||'maritimo';
+  const incoterm=(document.getElementById('s-inco')?.value||'FOB').toUpperCase();
   const isV  =['auto','moto','camion'].includes(tipo);
 
   setEl('ctx-tipo',TIPO_NAMES[tipo]||'—');
@@ -395,29 +419,36 @@ function calcular(){
     tags.push({t:`📦 $${TARIFA_LB_CARGA}/lb · ${lbs} lb`,c:'var(--sky)',b:'var(--bdr-hi)'});
   }
 
-  const seguro=fob*0.015;
-  const cif=fob+flete+seguro;
+  const originCharges = incoterm==='EXW' ? Math.max(120, fob*0.04) : incoterm==='FOB' ? Math.max(60, fob*0.01) : 0;
+  const insuredBase = fob + flete + originCharges;
+  const seguro=insuredBase*0.015;
+  const cif=fob+originCharges+flete+seguro;
   if(eur1Desc===1)eur1Desc=cif*0.05;
   const aranBruto=cif*pctAran, aranNeto=aranBruto-eur1Desc;
   const fodinfa=cif*0.005;
   const iva=(cif+aranNeto+fodinfa)*ivaRate;
   const salv=(D.salv_r||0)*cif;
+  const regimen='Importacion a consumo - Regimen 10';
+  const intermediario='Agente de aduana';
   const agente=D.agente, almacen=Math.round(cif*(D.almacen_r||0.01));
+  const locales=Math.max(90, Math.round(cif*0.006));
   const transp=D.transp, docs=D.docs;
-  const total=cif+aranNeto+fodinfa+iva+salv+rodaje+agente+almacen+transp+inenCosto+docs;
+  const total=cif+aranNeto+fodinfa+iva+salv+rodaje+agente+almacen+locales+transp+inenCosto+docs;
   lastCalcTotal=total;
 
   const fleteEl=document.getElementById('r-flete');if(fleteEl)fleteEl.textContent=fleteLabel;
-  setEl('r-fob',fmt(fob));setEl('r-seg',fmt(seguro));setEl('r-cif',fmt(cif));
+  setEl('r-fob',fmt(fob));setEl('r-origen',originCharges>0?fmt(originCharges):'Incluido en CIF');setEl('r-seg',fmt(seguro));setEl('r-cif',fmt(cif));
   setEl('r-aran-pct','('+(pctAran*100).toFixed(0)+'%)');setEl('r-aran',fmt(aranBruto));
   setEl('r-eur1',eur1Desc>0?'–'+fmt(eur1Desc):'–$0');
   setEl('r-fodinfa',fmt(fodinfa));setEl('r-iva-pct','('+(ivaRate*100).toFixed(0)+'%)');
   setEl('r-iva',fmt(iva));setEl('r-salv',salv>0?fmt(salv):'$0');
-  setEl('r-agente',fmt(agente));setEl('r-almacen',fmt(almacen));
+  setEl('r-regimen',`${regimen} / ${intermediario}`);
+  setEl('r-agente',fmt(agente));setEl('r-almacen',fmt(almacen));setEl('r-locales',fmt(locales));
   setEl('r-transp',fmt(transp));setEl('r-inen',inenCosto>0?fmt(inenCosto):'$0');
   setEl('r-docs',fmt(docs));setEl('r-total',fmt(total));
   setEl('r-saving','✅ Ahorro estimado vs. agencia tradicional: '+fmt(Math.round(total*0.03))+' con FastLedger');
   setEl('r-ia',D.ia||'');
+  setEl('r-precheck',getPrecheckMessage(tipo, pais, incoterm));
   showRow('row-rodaje',isV);setEl('r-rodaje',fmt(rodaje));
   showRow('row-inen',isV&&inenCosto>0);
   showRow('row-salv',salv>0);
@@ -426,7 +457,7 @@ function calcular(){
   if(pctAran===0&&!isV)tags.push({t:'🎁 Arancel 0%',c:'var(--green)',b:'rgba(52,211,153,.35)'});
   const tagsEl=document.getElementById('r-tags');
   if(tagsEl)tagsEl.innerHTML=tags.map(t=>`<span class="tag" style="color:${t.c};border-color:${t.b};background:${t.b.replace('.35','.08')}">${t.t}</span>`).join('');
-  const totImp=aranNeto+fodinfa+iva+salv,totFlt=flete+seguro,totTrm=agente+almacen+transp+inenCosto+docs+rodaje,grand=Math.max(1,fob+totImp+totFlt+totTrm);
+  const totImp=aranNeto+fodinfa+iva+salv,totFlt=flete+seguro+originCharges,totTrm=agente+almacen+locales+transp+inenCosto+docs+rodaje,grand=Math.max(1,fob+totImp+totFlt+totTrm);
   const ch=document.getElementById('r-bar')?.children;
   if(ch&&ch.length>=4){ch[0].style.flex=Math.max(2,Math.round(totImp/grand*100));ch[1].style.flex=Math.max(2,Math.round(totFlt/grand*100));ch[2].style.flex=Math.max(2,Math.round(fob/grand*100));ch[3].style.flex=Math.max(2,Math.round(totTrm/grand*100));}
   document.getElementById('checkout-cta').style.display = total>0 ? 'block' : 'none';
@@ -450,6 +481,12 @@ const PRODUCT_KEYWORDS={
   'telefono':'electronicos','teléfono':'electronicos','celular':'electronicos','iphone':'electronicos','laptop':'electronicos','tablet':'electronicos','electronico':'electronicos','electrónico':'electronicos',
   'reloj':'relojes','relojes':'relojes','juguete':'juguetes','juguetes':'juguetes','repuesto':'repuestos','repuestos':'repuestos'
 };
+const RESTRICTED_PRODUCT_HINTS=[
+  {words:['medicamento','medicamentos','farmaco','farmacos','pastillas','suplemento'],label:'medicamentos o suplementos',note:'pueden requerir registro sanitario, permisos previos y revision de autoridad sanitaria antes de comprar.'},
+  {words:['dron','drones'],label:'drones',note:'pueden requerir validacion tecnica, uso previsto y homologacion de equipos de radiofrecuencia.'},
+  {words:['cosmetico','cosmeticos','cosmetica','maquillaje','perfume'],label:'cosmeticos',note:'pueden requerir notificacion sanitaria, etiquetado y validacion documental.'},
+  {words:['alimento','alimentos','cafe','cacao'],label:'alimentos',note:'pueden requerir certificados sanitarios, fitosanitarios u origen segun el caso.'}
+];
 const VEHICLE_WORDS=['carro','coche','auto','vehiculo','vehículo','moto','camion','camión','bus','maquinaria'];
 const USED_WORDS=['usado','usada','segunda mano','de segunda'];
 
@@ -518,6 +555,10 @@ function isUsedVehicleRequest(msg){
   const n=normText(msg);
   return isVehicleRequest(msg)&&USED_WORDS.some(w=>n.includes(normText(w)));
 }
+function detectarRestriccion(msg){
+  const n=normText(msg);
+  return RESTRICTED_PRODUCT_HINTS.find(item => item.words.some(word => n.includes(normText(word)))) || null;
+}
 function resetLedgerState(){
   Object.assign(ledgerState,{producto:null,peso:null,pais:null,fob:null,flete:null,seguro:null,partida:null,iva:null,adValorem:null,fodinfa:null,costosLogisticos:null,margen:null,lastQuote:null});
 }
@@ -549,7 +590,11 @@ function quoteLedger(){
   const cost=ledgerState.peso*TARIFA_LEDGER;
   ledgerState.lastQuote={...ledgerState,cost};
   setEl('ctx-total',`$${cost.toFixed(2)}`);
-  return `Listo, ya tengo los datos:\n\nProducto: <strong>${ledgerState.producto}</strong>\nPeso: <strong>${ledgerState.peso.toFixed(2)} lb</strong>\nOrigen: <strong>${ledgerState.pais}</strong>\n\nTarifa FastLedger: <strong>$${TARIFA_LEDGER} USD/lb</strong>\nTotal estimado: <strong style="color:var(--sky);font-size:1.1em">${fmtMoney(cost)}</strong>\n\nEste valor es referencial para paquete pequeno. Para continuar, puedes enviar esta cotizacion por WhatsApp al <strong>0978775005</strong> o escribirnos a <strong>FastLedger010@gmail.com</strong>.\n\nQuieres que te indique los pasos para generar tu codigo de orden?`;
+  const restriccion=detectarRestriccion(ledgerState.producto||'');
+  const revision=restriccion
+    ? `\n\nRevision previa recomendada: <strong>${restriccion.label}</strong> ${restriccion.note}`
+    : '\n\nRevision previa recomendada: confirmar si tiene marca registrada, autorizacion de distribucion, etiquetado o documentos especiales antes de comprar.';
+  return `Listo, ya tengo los datos:\n\nProducto: <strong>${ledgerState.producto}</strong>\nPeso: <strong>${ledgerState.peso.toFixed(2)} lb</strong>\nOrigen: <strong>${ledgerState.pais}</strong>\n\nTarifa FastLedger: <strong>$${TARIFA_LEDGER} USD/lb</strong>\nTotal estimado: <strong style="color:var(--sky);font-size:1.1em">${fmtMoney(cost)}</strong>${revision}\n\nEste valor es referencial para paquete pequeno. Si es carga comercial o regimen 10, se debe cotizar agente de aduana, bodegaje, gastos locales, flete, seguro e impuestos.\n\nQuieres que te indique los pasos para generar tu codigo de orden?`;
 }
 function missingQuestion(){
   const miss=[];
@@ -562,6 +607,16 @@ function missingQuestion(){
 }
 function processSteps(){
   return `Claro. Para continuar con FastLedger:\n\n1. Confirma tu cotizacion.\n2. Envia tus datos de contacto.\n3. Recibe tu codigo de orden FastLedger.\n4. Envia el codigo por WhatsApp al <strong>0978775005</strong>.\n\nTambien puedes escribir a <strong>FastLedger010@gmail.com</strong>.`;
+}
+function agentOrCourierAnswer(){
+  return `Depende del tipo de operacion:\n\n<strong>Courier / paquetes pequenos</strong>: aplica para compras pequenas y envios por intermediario courier. Se cotiza por libra y el courier gestiona el ingreso.\n\n<strong>Importacion a consumo / Regimen 10</strong>: aplica para carga comercial, contenedores, vehiculos, maquinaria o volumen mayor. Necesitas <strong>agente de aduana</strong>, DAI, bodegaje, gastos locales, transporte interno, seguro y documentos completos.\n\nAntes de comprar conviene revisar producto, partida arancelaria, restricciones, pais de origen, Incoterm y si la marca exige carta de autorizacion para distribuir.`;
+}
+function restrictionAnswer(msg){
+  const hit=detectarRestriccion(msg);
+  if(hit){
+    return `Para <strong>${hit.label}</strong>, no recomiendo comprar ni embarcar sin revision previa: ${hit.note}\n\nFASTY debe validar partida arancelaria, documentos de control previo, proveedor, pais de origen, Incoterm, seguro y costos reales hasta bodega del cliente.`;
+  }
+  return `Si el producto puede tener restricciones, primero se valida viabilidad: partida arancelaria, documentos de control previo, permisos, etiquetado, marca, pais de origen y antecedentes de importaciones similares a Ecuador.\n\nEjemplos sensibles: medicamentos, cosmeticos, alimentos, drones, equipos de radiofrecuencia y productos con marca registrada.`;
 }
 const KB=[
   {k:['contacto','telefono','numero','llamar','whatsapp','correo','email','escribir','atencion','soporte','comunicar'],r:`Por supuesto. Nuestro equipo te atiende por:\n\nWhatsApp: <strong>0978775005</strong>\nEmail: <strong>FastLedger010@gmail.com</strong>\nHorario: <strong>Lunes a viernes, 8:00 a 18:00 Ecuador</strong>\n\nSi quieres, tambien puedo cotizarte aqui. Dime producto, peso y pais de origen.`},
@@ -587,6 +642,19 @@ function ledgerResponde(msg){
   }
 
   updateLedgerState(msg);
+
+  if(m.includes('agente')||m.includes('aduana')||m.includes('courier')||m.includes('regimen')||m.includes('intermediario')){
+    return agentOrCourierAnswer();
+  }
+  if(m.includes('restric')||m.includes('permiso')||m.includes('licencia')||m.includes('control previo')||detectarRestriccion(msg)){
+    return restrictionAnswer(msg);
+  }
+  if(m.includes('seguro')||m.includes('asegurada')||m.includes('asegurar')){
+    return 'La recomendacion es asegurar la carga desde origen hasta la bodega o destino final del cliente. El seguro reduce el impacto por robo, dano, perdida o incidentes durante transporte internacional, puerto y transporte interno. En la calculadora ya lo tratamos como seguro puerta a puerta referencial.';
+  }
+  if(m.includes('marca')||m.includes('distribuir')||m.includes('autorizacion')||m.includes('autorizacion')){
+    return 'Si el producto tiene marca, pide una carta de autorizacion de distribucion o soporte comercial del proveedor antes de importar. Si no tiene marca, igual conviene validar etiquetado, factura, origen y restricciones del producto.';
+  }
 
   if((m.includes('si')||m.includes('sí')||m.includes('quiero')||m.includes('continuar')||m.includes('proceder'))&&ledgerState.lastQuote){
     return processSteps();
