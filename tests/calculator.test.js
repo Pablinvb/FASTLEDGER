@@ -1,7 +1,8 @@
 const assert = require("node:assert");
 const {
   calculateImportEstimate,
-  calculateLedgerPackage
+  calculateLedgerPackage,
+  calculateFourByFourEstimate
 } = require("../src/calculator.js");
 
 function round(value) {
@@ -89,5 +90,21 @@ function round(value) {
 
 assert.equal(calculateLedgerPackage(4), 20);
 assert.equal(calculateLedgerPackage(0.5), 2.5);
+
+{
+  const result = calculateFourByFourEstimate({ lbs: 3, fob: 90 });
+  assert.equal(result.eligible, true);
+  assert.equal(result.customsFee, 20);
+  assert.equal(result.estimatedServiceTotal, 35);
+}
+
+{
+  const overweight = calculateFourByFourEstimate({ lbs: 10, fob: 90 });
+  const expensive = calculateFourByFourEstimate({ lbs: 3, fob: 450 });
+  assert.equal(overweight.eligible, false);
+  assert.ok(overweight.reasons.includes("supera 4 kg / 8.82 lb"));
+  assert.equal(expensive.eligible, false);
+  assert.ok(expensive.reasons.includes("supera USD 400 FOB"));
+}
 
 console.log("Calculator tests passed");

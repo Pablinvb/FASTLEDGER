@@ -27,6 +27,13 @@
 
   const DIST = { US: 0.55, MX: 0.60, BR: 0.70, ES: 0.85, FR: 0.88, IT: 0.90, DE: 0.95, KR: 1.60, JP: 1.65, CN: 1.45 };
   const TARIFA_LB_CARGA = 5;
+  const FOUR_BY_FOUR = {
+    maxKg: 4,
+    maxLb: 8.81848,
+    maxFob: 400,
+    annualFobLimit: 1600,
+    customsFee: 20
+  };
   const UE = ["DE", "ES", "IT", "FR"];
 
   function calculateImportEstimate(input) {
@@ -152,12 +159,42 @@
     return Number(lbs || 0) * ratePerLb;
   }
 
+  function calculateFourByFourEstimate(input, ratePerLb = 5) {
+    const lbs = Number(input.lbs || 0);
+    const fob = Number(input.fob || 0);
+    const freight = calculateLedgerPackage(lbs, ratePerLb);
+    const eligible = lbs > 0
+      && fob > 0
+      && lbs <= FOUR_BY_FOUR.maxLb
+      && fob <= FOUR_BY_FOUR.maxFob
+      && input.commercialUse !== true;
+    const reasons = [];
+    if (lbs <= 0) reasons.push("peso pendiente");
+    if (fob <= 0) reasons.push("valor FOB pendiente");
+    if (lbs > FOUR_BY_FOUR.maxLb) reasons.push("supera 4 kg / 8.82 lb");
+    if (fob > FOUR_BY_FOUR.maxFob) reasons.push("supera USD 400 FOB");
+    if (input.commercialUse === true) reasons.push("no aplica para fines comerciales");
+
+    return {
+      lbs,
+      kg: lbs / 2.20462,
+      fob,
+      freight,
+      customsFee: FOUR_BY_FOUR.customsFee,
+      estimatedServiceTotal: freight + (eligible ? FOUR_BY_FOUR.customsFee : 0),
+      eligible,
+      reasons
+    };
+  }
+
   return {
     CARGO,
     FLETE_VEH,
     DIST,
     TARIFA_LB_CARGA,
+    FOUR_BY_FOUR,
     calculateImportEstimate,
-    calculateLedgerPackage
+    calculateLedgerPackage,
+    calculateFourByFourEstimate
   };
 });

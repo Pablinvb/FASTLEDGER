@@ -467,7 +467,8 @@ function calcular(){
    LEDGER — Motor local (paquetes pequeños)
 ══════════════════════════════════ */
 const TARIFA_LEDGER=5;
-const ledgerState={producto:null,peso:null,pais:null,fob:null,flete:null,seguro:null,partida:null,iva:null,adValorem:null,fodinfa:null,costosLogisticos:null,margen:null,lastQuote:null};
+const FOUR_BY_FOUR_LIMIT={kg:4,lb:8.82,fob:400,annual:1600,fee:20};
+const ledgerState={producto:null,peso:null,pais:null,fob:null,flete:null,seguro:null,partida:null,iva:null,adValorem:null,fodinfa:null,costosLogisticos:null,margen:null,lastQuote:null,lastMode:null};
 const COUNTRY_ALIASES={
   'estados unidos':'Estados Unidos','eeuu':'Estados Unidos','usa':'Estados Unidos','us':'Estados Unidos','miami':'Estados Unidos','new york':'Estados Unidos',
   'china':'China','cn':'China','espana':'Espana','españa':'Espana','spain':'Espana','alemania':'Alemania','germany':'Alemania','de':'Alemania',
@@ -559,15 +560,19 @@ function detectarRestriccion(msg){
   const n=normText(msg);
   return RESTRICTED_PRODUCT_HINTS.find(item => item.words.some(word => n.includes(normText(word)))) || null;
 }
+function wantsFourByFour(msg){
+  const n=normText(msg);
+  return n.includes('4x4') || n.includes('4 x 4') || n.includes('categoria b') || n.includes('category b') || n.includes('courier categoria b');
+}
 function resetLedgerState(){
-  Object.assign(ledgerState,{producto:null,peso:null,pais:null,fob:null,flete:null,seguro:null,partida:null,iva:null,adValorem:null,fodinfa:null,costosLogisticos:null,margen:null,lastQuote:null});
+  Object.assign(ledgerState,{producto:null,peso:null,pais:null,fob:null,flete:null,seguro:null,partida:null,iva:null,adValorem:null,fodinfa:null,costosLogisticos:null,margen:null,lastQuote:null,lastMode:null});
 }
 function updateLedgerState(msg){
   const producto=detectarProducto(msg), peso=detectarLibras(msg), pais=detectarPais(msg);
   if(producto)ledgerState.producto=producto;
   if(peso!==null)ledgerState.peso=peso;
   if(pais)ledgerState.pais=pais;
-  const fob=detectarMonto(msg,['fob','valor fob','valor del producto','producto cuesta','cuesta']);
+  const fob=detectarMonto(msg,['fob','valor fob','valor del producto','valor','precio','producto cuesta','cuesta']);
   const flete=detectarMonto(msg,['flete','envio','envío','transporte internacional']);
   const seguro=detectarMonto(msg,['seguro']);
   const costos=detectarMonto(msg,['costos logisticos','costos logísticos','logistica','logística','agente','almacenaje']);
@@ -596,6 +601,37 @@ function quoteLedger(){
     : '\n\nRevision previa recomendada: confirmar si tiene marca registrada, autorizacion de distribucion, etiquetado o documentos especiales antes de comprar.';
   return `Listo, ya tengo los datos:\n\nProducto: <strong>${ledgerState.producto}</strong>\nPeso: <strong>${ledgerState.peso.toFixed(2)} lb</strong>\nOrigen: <strong>${ledgerState.pais}</strong>\n\nTarifa FastLedger: <strong>$${TARIFA_LEDGER} USD/lb</strong>\nTotal estimado: <strong style="color:var(--sky);font-size:1.1em">${fmtMoney(cost)}</strong>${revision}\n\nEste valor es referencial para paquete pequeno. Si es carga comercial o regimen 10, se debe cotizar agente de aduana, bodegaje, gastos locales, flete, seguro e impuestos.\n\nQuieres que te indique los pasos para generar tu codigo de orden?`;
 }
+function fourByFourInfo(){
+  return `El <strong>4x4</strong> es la Categoria B de courier para Ecuador: paquetes de uso personal, sin fines comerciales, de hasta <strong>4 kg</strong> y hasta <strong>USD 400 FOB</strong> al mismo tiempo.\n\nPuntos clave:\n\n- Cupo referencial: <strong>USD 1,600 FOB por destinatario al ano fiscal</strong>.\n- Tarifa aduanera fija vigente: <strong>USD 20</strong> para Categoria B.\n- Debe venir a nombre del destinatario real y con courier autorizado.\n- No sirve para compras comerciales ni para dividir pedidos de varias personas.\n\nPara cotizarte dime: producto, peso, valor FOB y pais de origen. Ejemplo: "4x4 zapatos, 3 lb, valor 80, desde USA".`;
+}
+function quoteFourByFour(){
+  const missing=[];
+  if(!ledgerState.producto)missing.push('producto');
+  if(!ledgerState.peso)missing.push('peso');
+  if(!ledgerState.fob)missing.push('valor FOB');
+  if(missing.length){
+    return `Para revisar si tu pedido aplica a <strong>4x4</strong> necesito: <strong>${missing.join(', ')}</strong>.\n\nEjemplo: "4x4 zapatos, 3 lb, valor FOB 80, desde Estados Unidos".`;
+  }
+  const lbs=Number(ledgerState.peso||0);
+  const kg=lbs/2.20462;
+  const fob=Number(ledgerState.fob||0);
+  const freight=lbs*TARIFA_LEDGER;
+  const issues=[];
+  if(kg>FOUR_BY_FOUR_LIMIT.kg)issues.push(`peso ${kg.toFixed(2)} kg supera 4 kg`);
+  if(fob>FOUR_BY_FOUR_LIMIT.fob)issues.push(`FOB ${fmtMoney(fob)} supera USD 400`);
+  const restriccion=detectarRestriccion(ledgerState.producto||'');
+  if(restriccion)issues.push(`${restriccion.label}: requiere revision previa`);
+  const eligible=issues.length===0;
+  const customs=eligible?FOUR_BY_FOUR_LIMIT.fee:0;
+  const total=freight+customs;
+  ledgerState.lastQuote={...ledgerState,cost:total,freight,customs,mode:'4x4'};
+  ledgerState.lastMode='4x4';
+  setEl('ctx-total',`$${total.toFixed(2)}`);
+  if(!eligible){
+    return `Este pedido <strong>no califica automaticamente como 4x4</strong>.\n\nProducto: <strong>${ledgerState.producto}</strong>\nPeso: <strong>${lbs.toFixed(2)} lb</strong> (${kg.toFixed(2)} kg)\nFOB: <strong>${fmtMoney(fob)}</strong>\n\nMotivo: ${issues.map(i=>`<strong>${i}</strong>`).join(', ')}.\n\nPuedo cotizarlo como paquete estandar por libra o derivarlo a Presupuesto IA si es carga comercial, categoria C/D o requiere permisos.`;
+  }
+  return `Tu pedido <strong>si aplica preliminarmente a 4x4 / Categoria B</strong>.\n\nProducto: <strong>${ledgerState.producto}</strong>\nPeso: <strong>${lbs.toFixed(2)} lb</strong> (${kg.toFixed(2)} kg)\nFOB: <strong>${fmtMoney(fob)}</strong>\nOrigen: <strong>${ledgerState.pais||'por confirmar'}</strong>\n\nFlete FastLedger: <strong>${fmtMoney(freight)}</strong>\nTarifa aduanera Categoria B: <strong>${fmtMoney(customs)}</strong>\nTotal estimado servicio + tarifa: <strong style="color:var(--sky);font-size:1.1em">${fmtMoney(total)}</strong>\n\nCondiciones: uso personal, sin fines comerciales, maximo 4 kg y USD 400 FOB, cupo anual de USD ${FOUR_BY_FOUR_LIMIT.annual.toLocaleString('en-US')} FOB por destinatario. El courier debe estar autorizado y los datos deben coincidir con el destinatario.`;
+}
 function missingQuestion(){
   const miss=[];
   if(!ledgerState.producto)miss.push('que producto quieres importar');
@@ -609,7 +645,7 @@ function processSteps(){
   return `Claro. Para continuar con FastLedger:\n\n1. Confirma tu cotizacion.\n2. Envia tus datos de contacto.\n3. Recibe tu codigo de orden FastLedger.\n4. Envia el codigo por WhatsApp al <strong>0978775005</strong>.\n\nTambien puedes escribir a <strong>FastLedger010@gmail.com</strong>.`;
 }
 function agentOrCourierAnswer(){
-  return `Depende del tipo de operacion:\n\n<strong>Courier / paquetes pequenos</strong>: aplica para compras pequenas y envios por intermediario courier. Se cotiza por libra y el courier gestiona el ingreso.\n\n<strong>Importacion a consumo / Regimen 10</strong>: aplica para carga comercial, contenedores, vehiculos, maquinaria o volumen mayor. Necesitas <strong>agente de aduana</strong>, DAI, bodegaje, gastos locales, transporte interno, seguro y documentos completos.\n\nAntes de comprar conviene revisar producto, partida arancelaria, restricciones, pais de origen, Incoterm y si la marca exige carta de autorizacion para distribuir.`;
+  return `Depende del tipo de operacion:\n\n<strong>Courier / paquetes pequenos</strong>: aplica para compras pequenas. Si cumple <strong>4x4 / Categoria B</strong>, debe ser uso personal, hasta 4 kg y hasta USD 400 FOB. El courier gestiona la declaracion y aplica la tarifa aduanera fija vigente.\n\n<strong>Importacion a consumo / Regimen 10</strong>: aplica para carga comercial, contenedores, vehiculos, maquinaria o volumen mayor. Necesitas <strong>agente de aduana</strong>, DAI, bodegaje, gastos locales, transporte interno, seguro y documentos completos.\n\nAntes de comprar conviene revisar producto, partida arancelaria, restricciones, pais de origen, Incoterm y si la marca exige carta de autorizacion para distribuir.`;
 }
 function restrictionAnswer(msg){
   const hit=detectarRestriccion(msg);
@@ -642,6 +678,14 @@ function ledgerResponde(msg){
   }
 
   updateLedgerState(msg);
+
+  if(wantsFourByFour(msg) || ledgerState.lastMode==='4x4'){
+    if(m.includes('que es') || m.includes('como funciona') || (!ledgerState.producto&&!ledgerState.peso&&!ledgerState.fob)){
+      ledgerState.lastMode='4x4';
+      return fourByFourInfo();
+    }
+    return quoteFourByFour();
+  }
 
   if(m.includes('agente')||m.includes('aduana')||m.includes('courier')||m.includes('regimen')||m.includes('intermediario')){
     return agentOrCourierAnswer();
