@@ -8,6 +8,7 @@
       iva: 0.15,
       fodinfa: 0.005,
       baseRisk: 38,
+      defaultFob: 3200,
       days: [3, 7],
       margin: 18,
       permits: ["Factura comercial", "Certificado fitosanitario", "Guia aerea o documento de transporte", "Revision Agrocalidad/SENAE"],
@@ -23,6 +24,7 @@
       iva: 0.15,
       fodinfa: 0.005,
       baseRisk: 43,
+      defaultFob: 180000,
       days: [18, 30],
       margin: 22,
       permits: ["Factura y packing list", "UN 38.3 para baterias", "Revision de marca y garantia", "Agente/courier segun valor y volumen"],
@@ -38,6 +40,7 @@
       iva: 0.15,
       fodinfa: 0.005,
       baseRisk: 68,
+      defaultFob: 48000,
       days: [28, 42],
       margin: 25,
       permits: ["Registro de importador", "Validacion tecnica ARCOTEL si aplica", "Ficha tecnica del fabricante", "Agente de aduana para regimen 10"],
@@ -53,6 +56,7 @@
       iva: 0.15,
       fodinfa: 0.005,
       baseRisk: 54,
+      defaultFob: 22000,
       days: [35, 48],
       margin: 18,
       permits: ["Registro de importador", "Mill Test Certificate", "Certificado de calidad", "Revision de medidas antidumping"],
@@ -68,6 +72,7 @@
       iva: 0,
       fodinfa: 0,
       baseRisk: 31,
+      defaultFob: 98000,
       days: [24, 34],
       margin: 29,
       permits: ["Certificado fitosanitario", "Certificado de origen", "Trazabilidad de lote", "Factura y packing list"],
@@ -83,6 +88,7 @@
       iva: 0.15,
       fodinfa: 0.005,
       baseRisk: 46,
+      defaultFob: 350,
       days: [12, 28],
       margin: 20,
       permits: ["Factura comercial", "Etiquetado", "Revision de marca", "Courier 4x4/Categoria C/D segun peso y FOB"],
@@ -98,6 +104,7 @@
       iva: 0.15,
       fodinfa: 0.005,
       baseRisk: 50,
+      defaultFob: 0,
       days: [18, 35],
       margin: 15,
       permits: ["Factura comercial", "Packing list", "Partida arancelaria validada", "Revision de restricciones"],
@@ -195,12 +202,14 @@
     const profile = profileFor(ctx);
     const origin = inferOrigin(ctx);
     const destination = inferDestination(ctx);
-    const fob = inferFob(ctx);
+    const confirmedFob = inferFob(ctx);
+    const fob = confirmedFob || profile.defaultFob || 0;
+    const estimatedFob = !confirmedFob && fob > 0;
     const missing = [];
     if(!ctx.product && profile === PRODUCT_PROFILES.generic) missing.push("producto");
     if(!origin) missing.push("pais de origen");
     if(!destination) missing.push("destino");
-    if(!fob) missing.push("valor FOB");
+    if(!confirmedFob) missing.push("valor FOB");
 
     const freightRate = ctx.direction === "export" ? 0.08 : profile.product === "Flores frescas" ? 0.18 : 0.11;
     const freight = fob ? Math.max(120, fob * freightRate) : 0;
@@ -216,6 +225,7 @@
     const titleAction = ctx.direction === "export" ? "Exportacion" : "Importacion";
     const product = ctx.product || profile.product;
     const assumptions = missing.length ? ` Datos pendientes: ${missing.join(", ")}. FASTY no debe cerrar el calculo sin confirmarlos.` : "";
+    const estimateNote = estimatedFob ? ` Como no se confirmo el FOB de la factura, el desglose usa un FOB referencial de ${money(fob)} para mostrar una proyeccion preliminar.` : "";
 
     return {
       title: `${titleAction} de ${product} ${origin ? `desde ${origin}` : ""}`,
@@ -223,14 +233,14 @@
       origin,
       destination,
       tariff: profile.tariff,
-      landed: fob ? money(total) : "Pendiente",
+      landed: fob ? `${money(total)}${estimatedFob ? " est." : ""}` : "Requiere FOB",
       days: `${days[0]}-${days[1]} dias`,
       margin: `${profile.margin.toFixed(1)}%`,
       risk,
-      summary: `${profile.product === "Mercancia por confirmar" ? "Operacion incompleta" : "Operacion analizada"} con base en producto, origen, factura/contexto e Incoterm ${ctx.incoterm}. ${profile.risks[0] ? `Principal alerta: ${profile.risks[0]}.` : ""}${assumptions}`,
+      summary: `${profile.product === "Mercancia por confirmar" ? "Operacion incompleta" : "Operacion analizada"} con base en producto, origen, factura/contexto e Incoterm ${ctx.incoterm}. ${profile.risks[0] ? `Principal alerta: ${profile.risks[0]}.` : ""}${estimateNote}${assumptions}`,
       permits: [...profile.permits, ...missing.map(item => `Confirmar ${item}`)],
       costs: [
-        ["FOB", fob],
+        [estimatedFob ? "FOB estimado" : "FOB", fob],
         ["Flete internacional", freight],
         ["Seguro", insurance],
         ["Ad-valorem", advalorem],
@@ -359,7 +369,7 @@
       `<li><i class="fas ${index === 0 ? "fa-circle-check" : "fa-triangle-exclamation"}"></i>${permit}</li>`
     ).join("");
     byId("fasty-costs").innerHTML = item.costs.map(cost =>
-      `<div><span>${cost[0]}</span><b>${cost[1] ? money(cost[1]) : "Pendiente"}</b></div>`
+      `<div><span>${cost[0]}</span><b>${cost[1] ? money(cost[1]) : "Requiere FOB"}</b></div>`
     ).join("");
     byId("fasty-route-origin").textContent = item.origin || "Origen por confirmar";
     byId("fasty-route-destination").textContent = item.destination || "Destino por confirmar";
