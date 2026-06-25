@@ -704,9 +704,17 @@
           <div class="fg">
             <label>Incoterm</label>
             <select id="s-inco" onchange="calcular()">
-              <option value="FOB">FOB — Free On Board</option>
-              <option value="CIF">CIF — Cost, Insurance & Freight</option>
               <option value="EXW">EXW — Ex Works</option>
+              <option value="FCA">FCA — Free Carrier</option>
+              <option value="FAS">FAS — Free Alongside Ship</option>
+              <option value="FOB" selected>FOB — Free On Board</option>
+              <option value="CFR">CFR — Cost & Freight</option>
+              <option value="CIF">CIF — Cost, Insurance & Freight</option>
+              <option value="CPT">CPT — Carriage Paid To</option>
+              <option value="CIP">CIP — Carriage & Insurance Paid To</option>
+              <option value="DAP">DAP — Delivered At Place</option>
+              <option value="DPU">DPU — Delivered At Place Unloaded</option>
+              <option value="DDP">DDP — Delivered Duty Paid</option>
             </select>
           </div>
           <div class="snav">
@@ -748,6 +756,31 @@
           </div>
         </div>
         <div id="r-content">
+          <section class="incoterm-board">
+            <div class="inc-head">
+              <div>
+                <span class="ops-kicker">Dashboard Incoterms 2020</span>
+                <h4 id="inc-title">Producto + Incoterm</h4>
+              </div>
+              <div class="inc-badge" id="inc-badge">FOB</div>
+            </div>
+            <div class="inc-route">
+              <div class="inc-node origin"><i class="fas fa-industry"></i><b id="inc-origin">Origen</b><small>Fábrica / proveedor</small></div>
+              <div class="inc-line">
+                <span id="inc-marker" style="left:33%"></span>
+              </div>
+              <div class="inc-node port"><i class="fas fa-anchor"></i><b id="inc-port">Puerto / aeropuerto</b><small>Entrega internacional</small></div>
+              <div class="inc-line">
+                <span class="ghost"></span>
+              </div>
+              <div class="inc-node dest"><i class="fas fa-warehouse"></i><b id="inc-dest">Destino</b><small>Bodega cliente</small></div>
+            </div>
+            <div class="inc-resp">
+              <div><span>Vendedor cubre</span><strong id="inc-seller">—</strong></div>
+              <div><span>Comprador cubre</span><strong id="inc-buyer">—</strong></div>
+              <div><span>Riesgo se transfiere</span><strong id="inc-risk">—</strong></div>
+            </div>
+          </section>
           <div class="bar" id="r-bar">
             <div style="flex:30;background:var(--sky)"></div>
             <div style="flex:20;background:var(--sky-lo)"></div>
@@ -802,6 +835,14 @@
           <div class="ia-box">
             <strong><i class="fas fa-clipboard-check" style="margin-right:5px"></i>Revisión previa: </strong>
             <span id="r-precheck">FASTY validará restricciones, documentos de control previo, permisos y viabilidad antes del embarque.</span>
+          </div>
+          <div class="ia-box">
+            <strong><i class="fas fa-barcode" style="margin-right:5px"></i>Partida arancelaria: </strong>
+            <span id="r-hs">Selecciona producto para ver una clasificación HS referencial y su criterio técnico.</span>
+          </div>
+          <div class="ia-box">
+            <strong><i class="fas fa-piggy-bank" style="margin-right:5px"></i>Ahorro FastLedger: </strong>
+            <span id="r-saving-why">El ahorro se calcula al comparar automatización, trazabilidad documental y cotización logística contra gestión manual tradicional.</span>
           </div>
           <button class="checkout-btn" id="checkout-cta" style="display:none" onclick="openCheckout()">
             <i class="fas fa-shopping-cart" style="margin-right:8px"></i>Proceder a contratación del servicio

@@ -326,9 +326,69 @@ const DIST={US:.55,MX:.60,BR:.70,ES:.85,FR:.88,IT:.90,DE:.95,KR:1.60,JP:1.65,CN:
 const TIPO_NAMES={auto:'🚗 Automóvil',moto:'🏍️ Motocicleta',camion:'🚚 Camión/Bus',maquinaria:'⚙️ Maquinaria Industrial',electrodomestico_g:'🏗️ Equipos Industriales',acero:'🔩 Acero/Metales'};
 const PAIS_NAMES={DE:'🇩🇪 Alemania',JP:'🇯🇵 Japón',US:'🇺🇸 EE.UU.',CN:'🇨🇳 China',ES:'🇪🇸 España',KR:'🇰🇷 Corea del Sur',IT:'🇮🇹 Italia',FR:'🇫🇷 Francia',BR:'🇧🇷 Brasil',MX:'🇲🇽 México'};
 
+
+const INCOTERMS={
+  EXW:{pos:5,seller:'Mercancia disponible en fabrica. No carga, no exporta, no transporta.',buyer:'Carga, despacho exportacion, flete, seguro, importacion, tributos y entrega final.',risk:'En fabrica/proveedor antes de cargar.'},
+  FCA:{pos:18,seller:'Entrega al transportista designado y despacho de exportacion.',buyer:'Flete principal, seguro, importacion, tributos y entrega final.',risk:'Cuando entrega al transportista en punto acordado.'},
+  FAS:{pos:25,seller:'Entrega al costado del buque y despacho de exportacion.',buyer:'Carga al buque, flete maritimo, seguro, destino e importacion.',risk:'Al costado del buque en puerto de origen.'},
+  FOB:{pos:33,seller:'Despacho exportacion y carga a bordo del buque.',buyer:'Flete internacional, seguro, destino, aduana e impuestos.',risk:'Cuando la carga queda a bordo del buque.'},
+  CFR:{pos:55,seller:'Flete internacional hasta puerto destino.',buyer:'Seguro, gastos destino, aduana, tributos y entrega final.',risk:'A bordo del buque en origen, aunque el vendedor pague flete.'},
+  CIF:{pos:58,seller:'Flete y seguro minimo hasta puerto destino.',buyer:'Gastos destino, aduana, tributos y transporte interno.',risk:'A bordo del buque en origen.'},
+  CPT:{pos:62,seller:'Transporte principal hasta punto acordado.',buyer:'Seguro, importacion, tributos y entrega posterior no incluida.',risk:'Al entregar al primer transportista.'},
+  CIP:{pos:66,seller:'Transporte principal y seguro ampliado hasta punto acordado.',buyer:'Importacion, tributos y gastos posteriores.',risk:'Al entregar al primer transportista.'},
+  DAP:{pos:84,seller:'Transporte hasta destino acordado sin descargar.',buyer:'Descarga, importacion, tributos y permisos.',risk:'En destino acordado listo para descargar.'},
+  DPU:{pos:89,seller:'Transporte y descarga en destino acordado.',buyer:'Importacion, tributos y permisos.',risk:'Despues de descargar en destino acordado.'},
+  DDP:{pos:97,seller:'Entrega en destino con importacion, tributos y despacho pagados.',buyer:'Recepcion y descarga si no se pacto otra cosa.',risk:'En destino final con tributos pagados.'}
+};
+const HS_PROFILES={
+  auto:{code:'8703',method:'Sistema Armonizado: vehiculos automoviles para transporte de personas. La subpartida final depende de motor, cilindraje y condicion.',why:'Se clasifica por funcion principal, tipo de propulsion y cilindrada.'},
+  moto:{code:'8711',method:'Sistema Armonizado: motocicletas y ciclos con motor auxiliar. La subpartida depende de cilindrada y propulsion.',why:'Se clasifica por tipo de vehiculo y caracteristicas tecnicas.'},
+  camion:{code:'8704/8702',method:'Sistema Armonizado: vehiculos para transporte de mercancias o pasajeros. Requiere ficha tecnica para cerrar subpartida.',why:'La funcion de transporte define la partida base.'},
+  maquinaria:{code:'8479/8428 por validar',method:'Sistema Armonizado: maquinas con funcion propia o equipos de manipulacion. Requiere ficha tecnica, uso y componentes.',why:'La partida se determina por funcion esencial y no solo por nombre comercial.'},
+  electrodomestico_g:{code:'8418/8450/8516 por validar',method:'Sistema Armonizado: equipos electricos o industriales segun funcion. Requiere ficha tecnica y voltaje.',why:'La funcion tecnica y componentes definen la clasificacion.'},
+  acero:{code:'7216.50.00',method:'Sistema Armonizado: perfiles de hierro o acero sin alear. Validar forma, aleacion, norma y certificado de colada.',why:'La composicion y forma fisica del metal determinan la partida.'}
+};
+
 function fmt(n){return '$'+Math.round(n).toLocaleString('en-US');}
 function setEl(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
 function showRow(id,show){const e=document.getElementById(id);if(e)e.style.display=show?'flex':'none';}
+
+function incotermCostPolicy(incoterm){
+  return {
+    originBuyer: ['EXW'].includes(incoterm),
+    freightSeller: ['CFR','CIF','CPT','CIP','DAP','DPU','DDP'].includes(incoterm),
+    insuranceSeller: ['CIF','CIP','DDP'].includes(incoterm),
+    destinationSeller: ['DAP','DPU','DDP'].includes(incoterm),
+    dutiesSeller: incoterm === 'DDP'
+  };
+}
+
+function updateIncotermDashboard({tipo,pais,incoterm,fob,flete,seguro,originCharges,locales,transp,agente,almacen,aranNeto,fodinfa,iva,total}){
+  const inc = INCOTERMS[incoterm] || INCOTERMS.FOB;
+  const policy = incotermCostPolicy(incoterm);
+  const name = TIPO_NAMES[tipo] || 'Mercancia';
+  setEl('inc-title', `${name} bajo ${incoterm} Incoterms 2020`);
+  setEl('inc-badge', incoterm);
+  setEl('inc-origin', PAIS_NAMES[pais] || pais || 'Origen');
+  setEl('inc-port', policy.freightSeller ? 'Destino pactado' : 'Puerto/aeropuerto');
+  setEl('inc-dest', policy.dutiesSeller ? 'DDP destino' : 'Bodega cliente');
+  const marker=document.getElementById('inc-marker'); if(marker) marker.style.left=`${inc.pos}%`;
+  setEl('inc-seller', inc.seller);
+  setEl('inc-buyer', inc.buyer);
+  setEl('inc-risk', inc.risk);
+  const buyerFreight = policy.freightSeller ? 0 : flete;
+  const buyerInsurance = policy.insuranceSeller ? 0 : seguro;
+  const buyerLocal = policy.destinationSeller ? 0 : locales + transp;
+  const buyerDuties = policy.dutiesSeller ? 0 : aranNeto + fodinfa + iva;
+  const buyerOperational = originCharges + buyerFreight + buyerInsurance + buyerLocal + buyerDuties + agente + almacen;
+  const sellerIncluded = total - fob - buyerOperational;
+  setEl('r-saving-why', `Ahorro estimado: FastLedger reduce reprocesos y sobrecostos al separar costos incluidos por vendedor (${fmt(Math.max(0,sellerIncluded))}) de costos reales del comprador (${fmt(Math.max(0,buyerOperational))}), validar documentos antes del embarque y comparar flete/seguro sin depender de una sola agencia.`);
+}
+
+function updateHsPanel(tipo,pctAran,ivaRate){
+  const hs = HS_PROFILES[tipo] || HS_PROFILES.maquinaria;
+  setEl('r-hs', `${hs.code} · ${hs.method} Criterio: ${hs.why} Arancel usado en esta simulacion: ${(pctAran*100).toFixed(0)}%, IVA ${(ivaRate*100).toFixed(0)}%. Clasificacion final debe validarse con ficha tecnica y fuente oficial.`);
+}
 
 function getPrecheckMessage(tipo, pais, incoterm){
   const origin = PAIS_NAMES[pais] || pais;
@@ -419,7 +479,8 @@ function calcular(){
     tags.push({t:`📦 $${TARIFA_LB_CARGA}/lb · ${lbs} lb`,c:'var(--sky)',b:'var(--bdr-hi)'});
   }
 
-  const originCharges = incoterm==='EXW' ? Math.max(120, fob*0.04) : incoterm==='FOB' ? Math.max(60, fob*0.01) : 0;
+  const policy = incotermCostPolicy(incoterm);
+  const originCharges = policy.originBuyer ? Math.max(120, fob*0.04) : ['FCA','FAS','FOB'].includes(incoterm) ? Math.max(60, fob*0.01) : 0;
   const insuredBase = fob + flete + originCharges;
   const seguro=insuredBase*0.015;
   const cif=fob+originCharges+flete+seguro;
@@ -436,12 +497,12 @@ function calcular(){
   const total=cif+aranNeto+fodinfa+iva+salv+rodaje+agente+almacen+locales+transp+inenCosto+docs;
   lastCalcTotal=total;
 
-  const fleteEl=document.getElementById('r-flete');if(fleteEl)fleteEl.textContent=fleteLabel;
-  setEl('r-fob',fmt(fob));setEl('r-origen',originCharges>0?fmt(originCharges):'Incluido en CIF');setEl('r-seg',fmt(seguro));setEl('r-cif',fmt(cif));
+  const fleteEl=document.getElementById('r-flete');if(fleteEl)fleteEl.textContent=policy.freightSeller ? `${fmt(flete)} incluido por vendedor (${incoterm})` : fleteLabel;
+  setEl('r-fob',fmt(fob));setEl('r-origen',originCharges>0?fmt(originCharges):`Incluido por vendedor (${incoterm})`);setEl('r-seg',policy.insuranceSeller?`${fmt(seguro)} incluido por vendedor`:fmt(seguro));setEl('r-cif',fmt(cif));
   setEl('r-aran-pct','('+(pctAran*100).toFixed(0)+'%)');setEl('r-aran',fmt(aranBruto));
   setEl('r-eur1',eur1Desc>0?'–'+fmt(eur1Desc):'–$0');
-  setEl('r-fodinfa',fmt(fodinfa));setEl('r-iva-pct','('+(ivaRate*100).toFixed(0)+'%)');
-  setEl('r-iva',fmt(iva));setEl('r-salv',salv>0?fmt(salv):'$0');
+  setEl('r-fodinfa',policy.dutiesSeller?`${fmt(fodinfa)} DDP vendedor`:fmt(fodinfa));setEl('r-iva-pct','('+(ivaRate*100).toFixed(0)+'%)');
+  setEl('r-iva',policy.dutiesSeller?`${fmt(iva)} DDP vendedor`:fmt(iva));setEl('r-salv',salv>0?fmt(salv):'$0');
   setEl('r-regimen',`${regimen} / ${intermediario}`);
   setEl('r-agente',fmt(agente));setEl('r-almacen',fmt(almacen));setEl('r-locales',fmt(locales));
   setEl('r-transp',fmt(transp));setEl('r-inen',inenCosto>0?fmt(inenCosto):'$0');
@@ -449,6 +510,8 @@ function calcular(){
   setEl('r-saving','✅ Ahorro estimado vs. agencia tradicional: '+fmt(Math.round(total*0.03))+' con FastLedger');
   setEl('r-ia',D.ia||'');
   setEl('r-precheck',getPrecheckMessage(tipo, pais, incoterm));
+  updateHsPanel(tipo,pctAran,ivaRate);
+  updateIncotermDashboard({tipo,pais,incoterm,fob,flete,seguro,originCharges,locales,transp,agente,almacen,aranNeto,fodinfa,iva,total});
   showRow('row-rodaje',isV);setEl('r-rodaje',fmt(rodaje));
   showRow('row-inen',isV&&inenCosto>0);
   showRow('row-salv',salv>0);
