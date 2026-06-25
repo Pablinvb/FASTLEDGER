@@ -287,12 +287,22 @@
           <button class="mode-tab" data-mode="audio" onclick="setFastyMode('audio',this)"><i class="fas fa-microphone"></i><span>Audio</span></button>
         </div>
 
+        <div class="fasty-context-grid">
+          <label><span>Flujo</span><select id="fasty-direction"><option value="import">Importar a Ecuador</option><option value="export">Exportar desde Ecuador</option></select></label>
+          <label><span>Producto</span><input id="fasty-product" placeholder="Ej: flores frescas, textiles, laptops"></label>
+          <label><span>Origen</span><input id="fasty-origin" placeholder="Ej: Colombia, Shenzhen, Turquía"></label>
+          <label><span>Destino</span><input id="fasty-destination" placeholder="Ej: Guayaquil, Quito, Rotterdam" value="Guayaquil, Ecuador"></label>
+          <label><span>Incoterm</span><select id="fasty-incoterm"><option value="FOB">FOB</option><option value="CIF">CIF</option><option value="EXW">EXW</option><option value="CFR">CFR</option><option value="DAP">DAP</option></select></label>
+          <label><span>FOB USD</span><input id="fasty-fob" type="number" min="0" placeholder="Ej: 12500"></label>
+        </div>
+
         <div class="fasty-input-pane on" id="fasty-pane-text">
           <label for="fasty-prompt">¿Qué operación quieres realizar?</label>
-          <textarea id="fasty-prompt" placeholder="Ejemplo: Quiero importar 300 drones desde Shenzhen a Guayaquil, valor FOB USD 48,000. Necesito saber permisos, impuestos, ruta y rentabilidad.">Quiero importar 300 drones desde Shenzhen a Guayaquil, valor FOB USD 48,000.</textarea>
+          <textarea id="fasty-prompt" placeholder="Ejemplo: Subí una factura de flores desde Colombia. Necesito validar partida, permisos, impuestos, ruta y costo final."></textarea>
           <div class="prompt-examples">
-            <button onclick="useFastyExample('acero')">10 toneladas de acero desde Turquía</button>
+            <button onclick="useFastyExample('flowers')">Factura de flores desde Colombia</button>
             <button onclick="useFastyExample('laptops')">500 laptops desde Shenzhen</button>
+            <button onclick="useFastyExample('acero')">10 toneladas de acero desde Turquía</button>
             <button onclick="useFastyExample('cacao')">Exportar cacao a Países Bajos</button>
           </div>
         </div>
@@ -311,7 +321,7 @@
           <label class="drop-zone" for="fasty-pdf">
             <i class="fas fa-file-invoice"></i>
             <strong>Sube una factura comercial</strong>
-            <span>Extracción simulada de FOB, peso, Incoterm, proveedor y país de origen.</span>
+            <span>FASTY usará el PDF con los campos de contexto para evitar asumir producto, origen o destino.</span>
             <input type="file" id="fasty-pdf" accept="application/pdf" onchange="handleFastyFile(this,'pdf')">
           </label>
           <div class="file-status" id="fasty-pdf-status">Ningún PDF seleccionado</div>
@@ -346,51 +356,48 @@
 
     <section class="fasty-results" id="fasty-results">
       <div class="result-head">
-        <div><span class="ops-kicker">Expediente generado</span><h2 id="fasty-result-title">Importación de 300 drones desde Shenzhen</h2></div>
-        <div class="risk-gauge" id="fasty-risk-gauge"><strong>68</strong><span>Risk Score</span></div>
+        <div><span class="ops-kicker" id="fasty-result-kicker">Expediente pendiente</span><h2 id="fasty-result-title">Completa los datos y genera el análisis</h2></div>
+        <div class="risk-gauge" id="fasty-risk-gauge"><strong>--</strong><span>Risk Score</span></div>
       </div>
       <div class="result-grid">
         <article class="result-panel span-2">
           <div class="panel-title"><i class="fas fa-clipboard-check"></i> Resumen ejecutivo</div>
-          <p id="fasty-summary">Operación viable con control regulatorio medio. Requiere validar homologación de radiofrecuencia, documentación técnica y uso previsto antes del embarque.</p>
+          <p id="fasty-summary">FASTY calculará el caso con el producto, país, factura y datos operativos que ingreses.</p>
           <div class="summary-metrics">
-            <div><span>Partida sugerida</span><strong id="fasty-tariff">8806.22.00</strong></div>
-            <div><span>Costo aterrizado</span><strong id="fasty-landed">$66,940</strong></div>
-            <div><span>Tiempo estimado</span><strong id="fasty-days">32–41 días</strong></div>
-            <div><span>Margen proyectado</span><strong id="fasty-margin">24.6%</strong></div>
+            <div><span>Partida sugerida</span><strong id="fasty-tariff">--</strong></div>
+            <div><span>Costo aterrizado</span><strong id="fasty-landed">--</strong></div>
+            <div><span>Tiempo estimado</span><strong id="fasty-days">--</strong></div>
+            <div><span>Margen proyectado</span><strong id="fasty-margin">--</strong></div>
           </div>
         </article>
         <article class="result-panel">
           <div class="panel-title"><i class="fas fa-stamp"></i> Permisos</div>
           <ul class="check-list" id="fasty-permits">
-            <li><i class="fas fa-circle-check"></i> Registro de importador</li>
-            <li><i class="fas fa-triangle-exclamation"></i> Validación ARCOTEL</li>
-            <li><i class="fas fa-circle-check"></i> Ficha técnica del fabricante</li>
+            <li><i class="fas fa-circle-check"></i> Pendiente de análisis</li>
           </ul>
         </article>
         <article class="result-panel">
           <div class="panel-title"><i class="fas fa-coins"></i> Tributos estimados</div>
           <div class="cost-stack" id="fasty-costs">
-            <div><span>FOB</span><b>$48,000</b></div>
-            <div><span>Flete + seguro</span><b>$4,720</b></div>
-            <div><span>Arancel + FODINFA</span><b>$2,870</b></div>
-            <div><span>IVA</span><b>$8,340</b></div>
-            <div><span>Logística local</span><b>$3,010</b></div>
+            <div><span>FOB</span><b>--</b></div>
+            <div><span>Flete + seguro</span><b>--</b></div>
+            <div><span>Arancel + FODINFA</span><b>--</b></div>
+            <div><span>IVA</span><b>--</b></div>
+            <div><span>Logística local</span><b>--</b></div>
           </div>
         </article>
         <article class="result-panel">
           <div class="panel-title"><i class="fas fa-route"></i> Ruta recomendada</div>
-          <div class="mini-route"><b>Shenzhen</b><span></span><b>Guayaquil</b></div>
-          <p class="panel-note">Yantian → transbordo Manzanillo → Contecon Guayaquil. Modalidad LCL prioritaria por volumen.</p>
+          <div class="mini-route"><b id="fasty-route-origin">Origen</b><span></span><b id="fasty-route-destination">Destino</b></div>
+          <p class="panel-note" id="fasty-route-note">La ruta se definirá según producto, origen, destino, urgencia e Incoterm.</p>
         </article>
         <article class="result-panel">
           <div class="panel-title"><i class="fas fa-building"></i> Proveedores sugeridos</div>
-          <div class="supplier-mini"><span>SV</span><div><b>SkyVision Robotics</b><small>4.8 · Verificado · Shenzhen</small></div></div>
-          <div class="supplier-mini"><span>AT</span><div><b>AeroTech Global</b><small>4.7 · ISO 9001 · Dongguan</small></div></div>
+          <div id="fasty-suppliers"><div class="supplier-mini"><span>--</span><div><b>Pendiente</b><small>FASTY sugerirá validaciones o proveedores según el caso.</small></div></div></div>
         </article>
         <article class="result-panel span-2">
           <div class="panel-title"><i class="fas fa-calendar-days"></i> Cronograma autónomo</div>
-          <div class="schedule-track">
+          <div class="schedule-track" id="fasty-schedule">
             <div class="schedule-item done"><span>1</span><b>Validar proveedor</b><small>Día 0–2</small></div>
             <div class="schedule-item"><span>2</span><b>Permisos previos</b><small>Día 3–8</small></div>
             <div class="schedule-item"><span>3</span><b>Pago y producción</b><small>Día 9–16</small></div>

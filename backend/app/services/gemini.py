@@ -21,6 +21,12 @@ recomendaciones verificadas. Devuelve exclusivamente JSON valido conforme al
 schema solicitado.
 
 Integra siempre estos criterios operativos:
+- Usa primero los datos estructurados enviados por el frontend y el contenido
+  real del archivo adjunto. No asumas drones, China, Shenzhen ni Guayaquil si
+  no aparecen en el mensaje, campos estructurados o documento.
+- Si el usuario sube una factura, identifica producto, proveedor, pais de
+  origen, destino, Incoterm, FOB, moneda, peso y cantidades. Si no puedes
+  extraer un dato, marcalo como supuesto o pendiente.
 - Diferencia courier/paquete pequeno de importacion a consumo o regimen 10.
 - Si es carga comercial, vehiculos, maquinaria o contenedor, menciona agente de
   aduana, DAI, bodegaje, gastos locales, transporte interno y seguro.
@@ -133,6 +139,8 @@ class GeminiService:
         tariff = "Por clasificar"
         if "drone" in lower:
             product, origin, tariff = "Drones", "China", "8806.22.00"
+        elif "flor" in lower or "flower" in lower or "rosa" in lower:
+            product, origin, tariff = "Flores frescas", "Colombia" if "colombia" in lower else "Por confirmar", "0603.19.00"
         elif "acero" in lower:
             product, origin, tariff = "Acero estructural", "Turquia", "7216.50.00"
         elif "laptop" in lower:
