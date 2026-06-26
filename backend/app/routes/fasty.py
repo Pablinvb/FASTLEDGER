@@ -23,6 +23,18 @@ ALLOWED_MULTIMODAL_TYPES = {
 }
 
 
+async def _safe_insert_consultation(
+    settings: Settings, row: dict
+) -> None:
+    repo = SupabaseRepository(settings)
+    if not repo.configured:
+        return
+    try:
+        await repo.insert("ai_consultations", row)
+    except HTTPException:
+        return
+
+
 @router.post("/analyze", response_model=FastyAnalysis)
 async def analyze(
     payload: FastyAnalyzeRequest,
@@ -32,8 +44,8 @@ async def analyze(
     analysis = await GeminiService(settings).analyze(payload.message)
     repo = SupabaseRepository(settings)
 
-    await repo.insert(
-        "ai_consultations",
+    await _safe_insert_consultation(
+        settings,
         {
             "user_id": str(user.id),
             "operation_id": str(payload.operation_id) if payload.operation_id else None,
@@ -44,7 +56,7 @@ async def analyze(
         },
     )
 
-    if payload.operation_id:
+    if payload.operation_id and repo.configured:
         updated = await repo.update_owned(
             "operations",
             str(payload.operation_id),
@@ -84,8 +96,8 @@ async def analyze_file(
         content=content,
         mime_type=mime_type,
     )
-    await SupabaseRepository(settings).insert(
-        "ai_consultations",
+    await _safe_insert_consultation(
+        settings,
         {
             "user_id": str(user.id),
             "operation_id": None,
