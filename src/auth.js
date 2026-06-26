@@ -64,14 +64,14 @@
     return `${location.origin}${location.pathname}`;
   }
 
-  async function authFetch(path, body, accessToken){
+  async function authFetch(path, body, accessToken, method = "POST"){
     const headers = {
       "apikey": cfg.anonKey,
       "Content-Type": "application/json"
     };
     headers.Authorization = `Bearer ${accessToken || cfg.anonKey}`;
     const res = await fetch(authUrl(path), {
-      method: "POST",
+      method,
       headers,
       body: JSON.stringify(body || {})
     });
@@ -119,6 +119,9 @@
     }
 
     const hash = new URLSearchParams(location.hash.replace(/^#/,""));
+    if(hash.get("type") === "recovery"){
+      return false;
+    }
     const accessToken = hash.get("access_token");
     const refreshToken = hash.get("refresh_token");
     if(accessToken){
@@ -146,6 +149,29 @@
     });
     if(data.session) saveSession(data.session);
     history.replaceState(null, "", `${location.origin}${location.pathname}`);
+    return true;
+  }
+
+  async function promptPasswordUpdateFromRecovery(){
+    const hash = new URLSearchParams(location.hash.replace(/^#/,""));
+    const type = hash.get("type");
+    const accessToken = hash.get("access_token");
+    if(type !== "recovery" || !accessToken) return false;
+
+    const password = prompt("Ingresa tu nueva contrasena para FastLedger:");
+    if(!password) return false;
+    const passCheck = validatePassword(password);
+    if(!passCheck.ok) throw new Error(passCheck.message);
+
+    await authFetch("user", {password}, accessToken, "PUT");
+    saveSession({
+      access_token: accessToken,
+      refresh_token: hash.get("refresh_token"),
+      expires_at: Math.floor(Date.now() / 1000) + Number(hash.get("expires_in") || 3600),
+      token_type: hash.get("token_type") || "bearer"
+    });
+    history.replaceState(null, "", `${location.origin}${location.pathname}${location.search}`);
+    alert("Contrasena actualizada. Ya puedes iniciar sesion.");
     return true;
   }
 
@@ -191,6 +217,14 @@
       }
     });
     if(data.session) saveSession(data.session);
+    const identities = data.user?.identities;
+    if(Array.isArray(identities) && identities.length === 0){
+      return {
+        user: userFromAuth(data.user),
+        accountAlreadyExists: true,
+        needsEmailConfirmation: true
+      };
+    }
     return {
       user: userFromAuth(data.user),
       needsEmailConfirmation: !data.session || !data.user?.email_confirmed_at
@@ -203,10 +237,22 @@
     }
     const emailCheck = validateEmail(email);
     if(!emailCheck.ok) throw new Error(emailCheck.message);
-    const data = await authFetch("token?grant_type=password", {
-      email: emailCheck.email,
-      password
-    });
+    let data;
+    try{
+      data = await authFetch("token?grant_type=password", {
+        email: emailCheck.email,
+        password
+      });
+    }catch(err){
+      const message = String(err.message || "");
+      if(/invalid login credentials|email not confirmed|not confirmed/i.test(message)){
+        try{ await resendConfirmation(emailCheck.email); }catch(_){}
+        throw new Error(
+          "No pudimos iniciar sesion con esos datos. Si ya te registraste, puede faltar confirmar el correo o la contrasena no coincide. Te intentamos reenviar el correo de verificacion; revisa spam/promociones o usa Recuperar contrasena."
+        );
+      }
+      throw err;
+    }
     const user = userFromAuth(data.user);
     if(!user?.email_verified){
       throw new Error("Revisa tu correo y confirma la cuenta antes de iniciar sesion.");
@@ -230,9 +276,22 @@
     });
   }
 
+  async function recoverPassword(email){
+    if(!configured()){
+      throw new Error("La recuperacion requiere Supabase Auth configurado.");
+    }
+    const emailCheck = validateEmail(email);
+    if(!emailCheck.ok) throw new Error(emailCheck.message);
+    const redirectTo = encodeURIComponent(appRedirectUrl());
+    return authFetch(`recover?redirect_to=${redirectTo}`, {
+      email: emailCheck.email
+    });
+  }
+
   async function currentUser(){
     if(!configured()) return null;
     saveSessionFromUrl();
+    await promptPasswordUpdateFromRecovery();
     await verifyTokenHashFromUrl();
     const session = readSession();
     if(!session) return null;
@@ -259,6 +318,7 @@
     signUp,
     signIn,
     resendConfirmation,
+    recoverPassword,
     currentUser,
     signOut
   };

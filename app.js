@@ -111,6 +111,14 @@ async function doRegister(){
       return;
     }
     const result = await AUTH.signUp(name, email, pass);
+    if(result.accountAlreadyExists){
+      alert('Esta cuenta ya estaba registrada. Te reenviamos la verificacion si estaba pendiente. Intenta iniciar sesion o usa Recuperar contrasena si no recuerdas la clave.');
+      try{ await AUTH.resendConfirmation(email); }catch(_){}
+      switchAuthTab('login');
+      document.getElementById('login-email').value = email;
+      document.getElementById('login-pass').value = '';
+      return;
+    }
     if(result.needsEmailConfirmation){
       alert('Te enviamos un correo de verificacion. Abre el enlace antes de iniciar sesion.');
       switchAuthTab('login');
@@ -142,6 +150,20 @@ async function resendVerificationEmail(){
       return;
     }
     alert(message || 'No se pudo reenviar el correo de verificacion.');
+  }
+}
+async function recoverPassword(){
+  const email = (document.getElementById('login-email')?.value || document.getElementById('reg-email')?.value || '').trim();
+  if(!email){alert('Escribe tu correo en el formulario para recuperar la contrasena.');return;}
+  try{
+    if(!AUTH || AUTH.mode!=='supabase'){
+      alert('La recuperacion requiere Supabase Auth configurado.');
+      return;
+    }
+    await AUTH.recoverPassword(email);
+    alert('Te enviamos un enlace para cambiar tu contrasena. Revisa tu correo, spam o promociones.');
+  }catch(err){
+    alert(err.message || 'No se pudo enviar la recuperacion de contrasena.');
   }
 }
 function showUserMenu(){
